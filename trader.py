@@ -180,24 +180,30 @@ class GabagoolTrader:
 
     # ── Price fetching (REST) ─────────────────────────────────────────────────
 
-    def _fetch_midpoint(self, token_id: str) -> float:
-        """GET /midpoint → returns mid price as float, or 0.0 on failure."""
+    def _fetch_best_price(self, token_id: str) -> float:
+        """GET /book → returns best ask price (real-time), or 0.0 on failure."""
         try:
-            r = self.http.get(f"{CLOB_HOST}/midpoint", params={"token_id": token_id})
+            r = self.http.get(f"{CLOB_HOST}/book", params={"token_id": token_id})
             if r.status_code == 200:
-                return float(r.json().get("mid", 0))
+                book = r.json()
+                asks = book.get("asks", [])
+                if asks:
+                    return float(asks[0].get("price", 0))
+                bids = book.get("bids", [])
+                if bids:
+                    return float(bids[0].get("price", 0))
         except Exception as e:
             print(f"\n[!] Fetch error ({token_id[:8]}...): {e}")
         return 0.0
 
     def _fetch_prices(self) -> tuple[float, float] | None:
-        """Fetch YES and NO midpoints via REST. Returns (yes_mid, no_mid) or None."""
+        """Fetch YES and NO best ask prices via REST. Returns (yes_price, no_price) or None."""
         token_ids = self.current_market.get("token_ids", [])
         if len(token_ids) < 2:
             return None
-        yes_mid = self._fetch_midpoint(token_ids[0])
-        no_mid  = self._fetch_midpoint(token_ids[1])
-        return yes_mid, no_mid
+        yes_price = self._fetch_best_price(token_ids[0])
+        no_price  = self._fetch_best_price(token_ids[1])
+        return yes_price, no_price
 
     # ── Order placement ───────────────────────────────────────────────────────
 
@@ -221,7 +227,7 @@ class GabagoolTrader:
                 return
             threshold = self.no_price
 
-        if mid_price <= 0.01 or mid_price > threshold:
+        if mid_price <= 0.05 or mid_price > threshold:
             return
 
         token_ids = self.current_market.get("token_ids", [])
@@ -397,7 +403,7 @@ class GabagoolTrader:
         pair_tag = " PAIR!" if self.state.both_filled else ""
 
         print(
-            f"  YES={yes_mid:.4f}({yes_status}) NO={no_mid:.4f}({no_status})"
+            f"  YES={yes_mid:.4f}[ask]({yes_status}) NO={no_mid:.4f}[ask]({no_status})"
             f"{pair_tag} | tick#{tick_num} {mode_tag}",
             end="\r",
         )

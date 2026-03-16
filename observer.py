@@ -95,7 +95,7 @@ class MarketFinder:
         for offset_min in [0, -15, 15]:
             ts = self._window_start_ts(now_ts, offset_min)
             slug = f"btc-updown-15m-{ts}"
-            label = {0: "текущее", -5: "предыдущее", 5: "следующее"}[offset_min]
+            label = {0: "текущее", -15: "предыдущее", 15: "следующее"}[offset_min]
             print(f"    Trying slug ({label}): {slug}")
 
             try:
