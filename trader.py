@@ -39,9 +39,11 @@ SHARES = 5                     # Shares per order
 PLACE_ORDER_BEFORE_SECS = 120  # Place orders 2 min before next window
 CHECK_INTERVAL = 0.5           # 500ms main loop
 FILL_CHECK_INTERVAL = 1.0      # Check fills every 1s
-STABLE_MIN = 0.35              # Good signal: prices in this range
-STABLE_MAX = 0.65
+STABLE_MIN = 0.30              # Good signal: prices in this range
+STABLE_MAX = 0.70
 CLEAR_THRESHOLD = 0.90         # Bad signal: one side above this
+DANGER_PRICE = 0.28            # Sell one-sided fill if price drops below
+DANGER_TIME_SECS = 900         # Sell one-sided fill after 15 min
 WINDOW_SECS = 900              # 15 minutes
 
 CLOB_HOST = "https://clob.polymarket.com"
@@ -80,11 +82,16 @@ class WindowState:
     no_fill_time:   float = 0.0
 
     # Control
-    orders_placed:  bool = False
-    signal_checked: bool = False
-    pair_alerted:   bool = False
+    orders_placed:    bool = False
+    signal_checked:   bool = False
+    signal_attempted: bool = False
+    pair_alerted:     bool = False
+    danger_sold:      bool = False
 
-    # Token IDs for the NEXT market
+    # First fill timestamp (for danger timeout)
+    fill_time: float = 0.0
+
+    # Token IDs for the target market
     yes_token_id: str = ""
     no_token_id:  str = ""
 
@@ -312,15 +319,13 @@ class GabagoolTrader:
     def _check_signal(self) -> tuple[bool, float, float]:
         """
         Check signal on CURRENT market. Returns (good, yes_mid, no_mid).
-        GOOD: STABLE_MIN <= yes_mid <= STABLE_MAX and yes_mid < CLEAR_THRESHOLD
+        Uses MarketFinder which correctly handles server time.
         """
-        current_ts = self._get_current_window_ts()
-        current_market = self._find_market_by_ts(current_ts)
-
-        if not current_market or len(current_market.get("token_ids", [])) < 2:
+        market = self.finder.find_current_btc_15m()
+        if not market or len(market.get("token_ids", [])) < 2:
             return False, 0.0, 0.0
 
-        token_ids = current_market["token_ids"]
+        token_ids = market["token_ids"]
         yes_mid = self._fetch_midpoint(token_ids[0])
         no_mid  = self._fetch_midpoint(token_ids[1])
 
@@ -334,20 +339,18 @@ class GabagoolTrader:
 
     # ── Pre-order placement ───────────────────────────────────────────────────
 
-    def _place_pre_orders(self):
-        """Place YES and NO limit buys on the NEXT window's market."""
-        next_ts = self._get_next_window_ts()
-        slug = f"btc-updown-15m-{next_ts}"
+    def _place_orders_for_ts(self, target_ts: int, label: str = "PRE-ORDER"):
+        """Place YES and NO limit buys on the market at target_ts."""
+        slug = f"btc-updown-15m-{target_ts}"
         slug_s = _slug_short(slug)
 
-        # Find next market
-        market = self._find_market_by_ts(next_ts)
+        market = self._find_market_by_ts(target_ts)
         if not market:
-            print(f"\n  [!] Next market not found: {slug}")
+            print(f"\n  [!] Market not found: {slug}")
             return
 
         token_ids = market["token_ids"]
-        self.state.window_ts = next_ts
+        self.state.window_ts = target_ts
         self.state.next_market_slug = slug
         self.state.yes_token_id = token_ids[0]
         self.state.no_token_id  = token_ids[1]
@@ -357,8 +360,8 @@ class GabagoolTrader:
         shares = self.shares
 
         if self.dry_run:
-            self.state.yes_order_id = f"DRY-YES-{next_ts}"
-            self.state.no_order_id  = f"DRY-NO-{next_ts}"
+            self.state.yes_order_id = f"DRY-YES-{target_ts}"
+            self.state.no_order_id  = f"DRY-NO-{target_ts}"
             print(f"\n  [DRY] Would place YES@{price} + NO@{price} x{shares}sh on {slug_s}")
         else:
             yes_id, yes_err = self._submit_order(token_ids[0], price, shares, "YES")
@@ -382,9 +385,9 @@ class GabagoolTrader:
 
         combined = price * 2
         edge_pct = round((1.0 - combined) * 100, 1)
-        msg = (f"📋 PRE-ORDER: YES@{price} + NO@{price} = ${combined:.2f}"
+        msg = (f"📋 {label}: YES@{price} + NO@{price} = ${combined:.2f}"
                f" ({edge_pct}% edge) x{shares}sh | {slug_s}")
-        print(f"\n  [PRE-ORDER] {msg}")
+        print(f"\n  [{label}] {msg}")
         send_telegram(msg)
 
         self.logger.start_new_session(slug)
@@ -452,11 +455,15 @@ class GabagoolTrader:
             self.state.yes_filled = True
             self.state.yes_fill_price = fill_price
             self.state.yes_fill_time = now
+            if self.state.fill_time == 0.0:
+                self.state.fill_time = now
             print(f"\n  [FILL] YES @ {fill_price}{sim} at {ts_str}")
         elif side == "NO" and not self.state.no_filled:
             self.state.no_filled = True
             self.state.no_fill_price = fill_price
             self.state.no_fill_time = now
+            if self.state.fill_time == 0.0:
+                self.state.fill_time = now
             print(f"\n  [FILL] NO @ {fill_price}{sim} at {ts_str}")
 
     def _on_pair_complete(self):
@@ -496,7 +503,12 @@ class GabagoolTrader:
         s      = self.state
         slug_s = _slug_short(s.next_market_slug) if s.next_market_slug else "?"
 
-        if s.both_filled:
+        if s.danger_sold:
+            side  = "YES" if s.yes_filled else "NO"
+            price = s.yes_fill_price if s.yes_filled else s.no_fill_price
+            result_line = f"🚨 DANGER EXIT: {side} sold @ market (was filled @ {price})"
+            self.total_incomplete += 1
+        elif s.both_filled:
             profit = round(s.edge * self.shares, 2)
             pct    = round((1.0 - s.pair_cost) * 100, 1)
             result_line = (
@@ -576,16 +588,17 @@ class GabagoolTrader:
             next_ts = self._get_next_window_ts()
             secs_to_next = next_ts - now
 
-            # ── Phase 1: Waiting / Signal check / Pre-order ───────
-            if not self.state.orders_placed:
+            # ── Phase 1: Pre-order (2 min before next window) ─────
+            if not self.state.orders_placed and not self.state.signal_attempted:
                 if secs_to_next <= PLACE_ORDER_BEFORE_SECS:
-                    # Time to check signal and place orders
+                    # Check signal exactly ONCE
+                    self.state.signal_attempted = True
                     good, yes_mid, no_mid = self._check_signal()
 
                     if good:
                         print(f"\n  [SIGNAL] GOOD: YES={yes_mid:.3f} NO={no_mid:.3f}"
                               f" | placing orders {secs_to_next:.0f}s before window")
-                        self._place_pre_orders()
+                        self._place_orders_for_ts(self._get_next_window_ts(), "PRE-ORDER")
                     else:
                         if yes_mid >= CLEAR_THRESHOLD or no_mid >= CLEAR_THRESHOLD:
                             reason = f"market decided (YES={yes_mid:.3f} NO={no_mid:.3f})"
@@ -596,10 +609,35 @@ class GabagoolTrader:
 
                         print(f"\n  [SKIP] Bad signal: {reason}")
                         self.state.signal_checked = True
-                        # Wait until this window passes, then reset
                         self.state.window_ts = next_ts
+
+            # ── Phase 1b: Mid-market orders (if no active orders) ─
+            if (not self.state.orders_placed
+                    and not self.state.signal_checked
+                    and not self.state.signal_attempted
+                    and secs_to_next > PLACE_ORDER_BEFORE_SECS):
+                current_ts = self._get_current_window_ts()
+                current_window_end = current_ts + WINDOW_SECS
+                time_remaining = current_window_end - now
+
+                if time_remaining > DANGER_TIME_SECS + PLACE_ORDER_BEFORE_SECS:
+                    good, yes_mid, no_mid = self._check_signal()
+                    self.state.signal_attempted = True
+
+                    if good:
+                        print(f"\n  [MID-MARKET] GOOD signal: YES={yes_mid:.3f} NO={no_mid:.3f}"
+                              f" | placing orders on current window ({time_remaining:.0f}s left)")
+                        self._place_orders_for_ts(current_ts, "MID-MARKET")
+                    else:
+                        # Bad signal for mid-market, will retry for pre-order later
+                        self.state.signal_attempted = False
+                        print(
+                            f"  [WAITING] secs_to_next={secs_to_next:.0f}"
+                            f" | pre-order in {secs_to_next - PLACE_ORDER_BEFORE_SECS:.0f}s"
+                            f" {('[DRY]' if self.dry_run else '[LIVE]')}",
+                            end="\r",
+                        )
                 else:
-                    # Still waiting
                     print(
                         f"  [WAITING] secs_to_next={secs_to_next:.0f}"
                         f" | pre-order in {secs_to_next - PLACE_ORDER_BEFORE_SECS:.0f}s"
@@ -608,11 +646,38 @@ class GabagoolTrader:
                     )
 
             # ── Phase 2: Monitoring fills ─────────────────────────
-            elif self.state.orders_placed:
+            if self.state.orders_placed:
                 # Check fills
                 if now - last_fill_check >= FILL_CHECK_INTERVAL:
                     self._check_fills()
                     last_fill_check = now
+
+                # ── Danger logic for one-sided fills ──────────────
+                if self.state.one_filled and not self.state.danger_sold:
+                    filled_side = "YES" if self.state.yes_filled else "NO"
+                    filled_token = self.state.yes_token_id if self.state.yes_filled else self.state.no_token_id
+                    time_since_fill = now - self.state.fill_time
+
+                    current_price = self._fetch_midpoint(filled_token)
+                    danger = False
+
+                    if current_price > 0.02 and current_price <= DANGER_PRICE:
+                        danger = True
+                        reason = f"price={current_price:.3f} <= {DANGER_PRICE}"
+                    elif time_since_fill >= DANGER_TIME_SECS:
+                        danger = True
+                        reason = f"time={time_since_fill:.0f}s >= {DANGER_TIME_SECS}s"
+
+                    if danger:
+                        self.state.danger_sold = True
+                        slug_s = _slug_short(self.state.next_market_slug)
+                        if self.dry_run:
+                            print(f"\n  [DANGER] Would sell {filled_side} @ {current_price:.3f} ({reason})")
+                        else:
+                            self._cancel_all_open_orders()
+                            print(f"\n  [DANGER] Selling {filled_side} @ market ({reason})")
+                        msg = f"⚠️ DANGER EXIT: sold {filled_side} @ {current_price:.3f} ({reason}) | {slug_s}"
+                        send_telegram(msg)
 
                 # Status line
                 slug_s = _slug_short(self.state.next_market_slug)
