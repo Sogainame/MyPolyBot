@@ -8,7 +8,7 @@ their midpoint drops below the configured threshold.  Polymarket auto-resolves
 Usage:
     python trader.py                                           # DRY RUN (safe)
     python trader.py --live                                    # LIVE (real money!)
-    python trader.py --live --yes-price 0.49 --no-price 0.49 --order-size 4
+    python trader.py --live --yes-price 0.45 --no-price 0.45 --order-size 4
 """
 
 import argparse
@@ -30,8 +30,8 @@ from notifier import send_telegram
 load_dotenv()
 
 # ── Trading constants ─────────────────────────────────────────────────────────
-BUY_PRICE_YES = 0.49        # Threshold / limit price for YES leg
-BUY_PRICE_NO  = 0.49        # Threshold / limit price for NO leg
+BUY_PRICE_YES = 0.45        # Threshold / limit price for YES leg
+BUY_PRICE_NO  = 0.45        # Threshold / limit price for NO leg
 ORDER_SIZE = 4.0            # USDC per side
 MAX_SPEND_PER_WINDOW = 10.0 # Max USDC per window (both sides combined)
 POLL_INTERVAL = 2.0         # Seconds between REST price polls
@@ -180,30 +180,29 @@ class GabagoolTrader:
 
     # ── Price fetching (REST) ─────────────────────────────────────────────────
 
-    def _fetch_best_price(self, token_id: str) -> float:
-        """GET /book → returns best ask price (real-time), or 0.0 on failure."""
+    def _fetch_midpoint(self, token_id: str) -> float:
         try:
-            r = self.http.get(f"{CLOB_HOST}/book", params={"token_id": token_id})
+            r = self.http.get(
+                "https://clob.polymarket.com/midpoint",
+                params={"token_id": token_id},
+                timeout=5.0
+            )
             if r.status_code == 200:
-                book = r.json()
-                asks = book.get("asks", [])
-                if asks:
-                    return float(asks[0].get("price", 0))
-                bids = book.get("bids", [])
-                if bids:
-                    return float(bids[0].get("price", 0))
+                mid = float(r.json().get("mid", 0))
+                if 0.02 < mid < 0.98:
+                    return mid
         except Exception as e:
-            print(f"\n[!] Fetch error ({token_id[:8]}...): {e}")
+            print(f"\n[!] Price fetch error: {e}")
         return 0.0
 
     def _fetch_prices(self) -> tuple[float, float] | None:
-        """Fetch YES and NO best ask prices via REST. Returns (yes_price, no_price) or None."""
+        """Fetch YES and NO midpoints via REST. Returns (yes_mid, no_mid) or None."""
         token_ids = self.current_market.get("token_ids", [])
         if len(token_ids) < 2:
             return None
-        yes_price = self._fetch_best_price(token_ids[0])
-        no_price  = self._fetch_best_price(token_ids[1])
-        return yes_price, no_price
+        yes_mid = self._fetch_midpoint(token_ids[0])
+        no_mid  = self._fetch_midpoint(token_ids[1])
+        return yes_mid, no_mid
 
     # ── Order placement ───────────────────────────────────────────────────────
 
@@ -227,7 +226,7 @@ class GabagoolTrader:
                 return
             threshold = self.no_price
 
-        if mid_price <= 0.05 or mid_price > threshold:
+        if mid_price <= 0.10 or mid_price > threshold:
             return
 
         token_ids = self.current_market.get("token_ids", [])
@@ -364,20 +363,23 @@ class GabagoolTrader:
     def _process_tick(self, yes_mid: float, no_mid: float, tick_num: int):
         """
         Core per-tick logic: log prices, track mins, maybe place orders.
-        Called every POLL_INTERVAL for the entire window duration.
+        Each side is checked INDEPENDENTLY — YES and NO thresholds are
+        evaluated separately so the bot can catch both at different times.
         """
-        # Skip entire tick if either side reports zero/stale data
-        if yes_mid <= 0.01 or no_mid <= 0.01:
+        # Skip only if BOTH are zero (total API failure)
+        if yes_mid <= 0.01 and no_mid <= 0.01:
             return
 
         self.logger.log(yes_mid, no_mid, 0, 0, 0, 0, source="rest")
 
-        self.state.seen_min_yes = min(self.state.seen_min_yes, yes_mid)
-        self.state.seen_min_no  = min(self.state.seen_min_no, no_mid)
+        # Track and evaluate each side independently
+        if yes_mid > 0.02:
+            self.state.seen_min_yes = min(self.state.seen_min_yes, yes_mid)
+            self._maybe_place_order("YES", yes_mid)
 
-        # Gabagool: check if we should place orders based on current prices
-        self._maybe_place_order("YES", yes_mid)
-        self._maybe_place_order("NO", no_mid)
+        if no_mid > 0.02:
+            self.state.seen_min_no = min(self.state.seen_min_no, no_mid)
+            self._maybe_place_order("NO", no_mid)
 
         self._print_status(yes_mid, no_mid, tick_num)
 
@@ -403,7 +405,7 @@ class GabagoolTrader:
         pair_tag = " PAIR!" if self.state.both_filled else ""
 
         print(
-            f"  YES={yes_mid:.4f}[ask]({yes_status}) NO={no_mid:.4f}[ask]({no_status})"
+            f"  YES={yes_mid:.4f}({yes_status}) NO={no_mid:.4f}({no_status})"
             f"{pair_tag} | tick#{tick_num} {mode_tag}",
             end="\r",
         )
