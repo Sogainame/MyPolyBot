@@ -1,17 +1,21 @@
 """
-Gabagool Strategy — Step 3: Automated Trader
+Gabagool Strategy — Pre-Order 15-Minute Markets
 
-Limit-order market-making on BTC 15-min markets.  At window start, places
-two GTC limit buys (YES + NO) below current midpoint.  Monitors fills for
-the duration of the window.  If both fill → guaranteed profit.
+Places limit buy orders on BOTH sides 2 minutes BEFORE the next window
+starts, when the market is still ~50/50. Monitors fills during the window.
+If both fill → guaranteed profit from the complete set (YES+NO = $1.00).
+
+Based on crellOS/polymarket-arbitrage-bot-pre-order-15m-markets.
 
 Usage:
-    python trader.py                                           # DRY RUN (safe)
-    python trader.py --live                                    # LIVE (real money!)
-    python trader.py --live --order-size 2 --spread 0.03
+    python trader.py                           # DRY RUN (safe)
+    python trader.py --live                    # LIVE (real money!)
+    python trader.py --live --shares 5 --price-limit 0.45
 """
 
 import argparse
+import json
+import math
 import os
 import time
 from dataclasses import dataclass
@@ -30,16 +34,18 @@ from notifier import send_telegram
 load_dotenv()
 
 # ── Trading constants ─────────────────────────────────────────────────────────
-SPREAD = 0.03               # Place order this far below midpoint
-MIN_YES_MID = 0.35          # Skip window if either side below this
-MAX_YES_MID = 0.65          # Skip window if either side above this
-ORDER_SIZE = 2.0            # USDC per side
-MAX_PAIR_COST = 0.96        # Only trade if combined order prices below this
-POLL_INTERVAL = 2.0         # Seconds between price checks
-FILL_CHECK_INTERVAL = 5.0   # Seconds between fill status polls
-WINDOW_DURATION = 960       # Seconds per window (16 min)
+PRICE_LIMIT = 0.45             # Limit buy price for both sides
+SHARES = 5                     # Shares per order
+PLACE_ORDER_BEFORE_SECS = 120  # Place orders 2 min before next window
+CHECK_INTERVAL = 0.5           # 500ms main loop
+FILL_CHECK_INTERVAL = 1.0      # Check fills every 1s
+STABLE_MIN = 0.35              # Good signal: prices in this range
+STABLE_MAX = 0.65
+CLEAR_THRESHOLD = 0.90         # Bad signal: one side above this
+WINDOW_SECS = 900              # 15 minutes
 
 CLOB_HOST = "https://clob.polymarket.com"
+GAMMA_API = "https://gamma-api.polymarket.com"
 CHAIN_ID = 137
 
 
@@ -51,35 +57,44 @@ def _slug_short(slug: str) -> str:
     return parts[-1] if len(parts) > 1 else slug
 
 
-# ── Per-window state ──────────────────────────────────────────────────────────
+# ── Per-cycle state ──────────────────────────────────────────────────────────
 
 @dataclass
 class WindowState:
+    # Which window we placed orders for
+    window_ts: int = 0
+    next_market_slug: str = ""
+
+    # Orders
     yes_order_id: str | None = None
     no_order_id:  str | None = None
-    yes_order_price: float = 0.0
-    no_order_price:  float = 0.0
-    yes_shares: float = 0.0
-    no_shares:  float = 0.0
+    yes_order_placed_at: float = 0.0
+    no_order_placed_at:  float = 0.0
 
+    # Fills
     yes_filled:     bool  = False
     no_filled:      bool  = False
     yes_fill_price: float = 0.0
     no_fill_price:  float = 0.0
+    yes_fill_time:  float = 0.0
+    no_fill_time:   float = 0.0
 
-    skipped:     bool = False
-    skip_reason: str  = ""
+    # Control
+    orders_placed:  bool = False
+    signal_checked: bool = False
+    pair_alerted:   bool = False
 
-    # Set True after pair alert sent (prevent duplicate alerts)
-    pair_alerted: bool = False
-
-    # Price extremes seen during window
-    seen_min_yes: float = float("inf")
-    seen_min_no:  float = float("inf")
+    # Token IDs for the NEXT market
+    yes_token_id: str = ""
+    no_token_id:  str = ""
 
     @property
     def both_filled(self) -> bool:
         return self.yes_filled and self.no_filled
+
+    @property
+    def one_filled(self) -> bool:
+        return (self.yes_filled or self.no_filled) and not self.both_filled
 
     @property
     def pair_cost(self) -> float:
@@ -90,10 +105,6 @@ class WindowState:
         """Profit per $1 payout after 2% winner fee."""
         return round((1.0 - self.pair_cost) * 0.98, 4)
 
-    @property
-    def orders_placed(self) -> bool:
-        return self.yes_order_id is not None or self.no_order_id is not None
-
 
 # ── Main trader class ─────────────────────────────────────────────────────────
 
@@ -102,27 +113,27 @@ class GabagoolTrader:
     def __init__(
         self,
         dry_run: bool = True,
-        order_size: float = ORDER_SIZE,
-        spread: float = SPREAD,
+        shares: int = SHARES,
+        price_limit: float = PRICE_LIMIT,
     ):
-        self.dry_run    = dry_run
-        self.order_size = order_size
-        self.spread     = spread
+        self.dry_run     = dry_run
+        self.shares      = shares
+        self.price_limit = price_limit
 
         self.finder = MarketFinder()
         self.logger = PriceLogger()
         self.http   = httpx.Client(timeout=10.0)
 
-        self.current_market: dict | None = None
         self.state = WindowState()
         self.running = False
 
         # Session stats
-        self.total_pairs:      int = 0
-        self.total_incomplete: int = 0
-        self.total_skipped:    int = 0
-        self.total_no_fills:   int = 0
-        self.window_count:     int = 0
+        self.total_pairs:      int   = 0
+        self.total_incomplete: int   = 0
+        self.total_skipped:    int   = 0
+        self.total_no_fills:   int   = 0
+        self.total_profit:     float = 0.0
+        self.window_count:     int   = 0
 
         self.clob = self._init_clob_client()
 
@@ -174,14 +185,14 @@ class GabagoolTrader:
         bal = self._get_balance()
         return f"${bal:.2f}" if bal is not None else "n/a"
 
-    # ── Price fetching (REST) ─────────────────────────────────────────────────
+    # ── Price fetching ────────────────────────────────────────────────────────
 
     def _fetch_midpoint(self, token_id: str) -> float:
         try:
             r = self.http.get(
-                "https://clob.polymarket.com/midpoint",
+                f"{CLOB_HOST}/midpoint",
                 params={"token_id": token_id},
-                timeout=5.0
+                timeout=5.0,
             )
             if r.status_code == 200:
                 mid = float(r.json().get("mid", 0))
@@ -190,15 +201,6 @@ class GabagoolTrader:
         except Exception as e:
             print(f"\n[!] Price fetch error: {e}")
         return 0.0
-
-    def _fetch_prices(self) -> tuple[float, float] | None:
-        """Fetch YES and NO midpoints via REST. Returns (yes_mid, no_mid) or None."""
-        token_ids = self.current_market.get("token_ids", [])
-        if len(token_ids) < 2:
-            return None
-        yes_mid = self._fetch_midpoint(token_ids[0])
-        no_mid  = self._fetch_midpoint(token_ids[1])
-        return yes_mid, no_mid
 
     # ── Order submission ──────────────────────────────────────────────────────
 
@@ -231,14 +233,12 @@ class GabagoolTrader:
                 if any(kw in err_low for kw in ("not enough", "balance", "allowance", "insufficient")):
                     bal = self._get_balance()
                     bal_s = f"${bal:.2f}" if bal is not None else "n/a"
-                    if bal is not None and bal < self.order_size:
-                        alert = f"⚠️ Low balance: {bal_s} (need ${self.order_size})"
-                        print(f"\n  [!] {alert}")
-                        send_telegram(alert)
+                    alert = f"⚠️ Low balance: {bal_s}"
+                    print(f"\n  [!] {alert}")
+                    send_telegram(alert)
                     return None, err_str
 
                 if "invalid" in err_low and attempt == 1:
-                    print(f"\n  [*] Retrying {side_label} in 2s...")
                     time.sleep(2)
                     continue
 
@@ -246,55 +246,123 @@ class GabagoolTrader:
 
         return None, "max retries exceeded"
 
-    # ── Step 1-3: Evaluate window and place orders ────────────────────────────
+    # ── Window timing ─────────────────────────────────────────────────────────
 
-    def _place_window_orders(self, yes_mid: float, no_mid: float) -> bool:
+    def _get_next_window_ts(self) -> int:
+        """Returns unix timestamp of the next 15-min window start."""
+        now = time.time()
+        return int(math.ceil(now / WINDOW_SECS) * WINDOW_SECS)
+
+    def _get_current_window_ts(self) -> int:
+        """Returns unix timestamp of the current 15-min window start."""
+        now = time.time()
+        return int(math.floor(now / WINDOW_SECS) * WINDOW_SECS)
+
+    # ── Market lookup by timestamp ────────────────────────────────────────────
+
+    def _find_market_by_ts(self, ts: int) -> dict | None:
+        """Look up a specific 15-min market by its window timestamp."""
+        slug = f"btc-updown-15m-{ts}"
+        try:
+            resp = self.http.get(
+                f"{GAMMA_API}/markets",
+                params={"slug": slug},
+                timeout=10.0,
+            )
+            if resp.status_code != 200:
+                return None
+
+            data = resp.json()
+            markets = data if isinstance(data, list) else [data]
+
+            for m in markets:
+                if not m or m.get("slug") != slug:
+                    continue
+                # Parse token IDs
+                clob_ids = m.get("clobTokenIds", "")
+                if isinstance(clob_ids, str):
+                    try:
+                        clob_ids = json.loads(clob_ids)
+                    except Exception:
+                        clob_ids = []
+                if len(clob_ids) < 2:
+                    continue
+
+                prices = m.get("outcomePrices", "")
+                if isinstance(prices, str):
+                    try:
+                        prices = [float(p) for p in json.loads(prices)]
+                    except Exception:
+                        prices = []
+
+                return {
+                    "slug": slug,
+                    "question": m.get("question", ""),
+                    "condition_id": m.get("conditionId", ""),
+                    "token_ids": clob_ids,
+                    "prices": prices,
+                }
+
+        except Exception as e:
+            print(f"\n[!] Market lookup error for {slug}: {e}")
+        return None
+
+    # ── Signal check (on current market) ──────────────────────────────────────
+
+    def _check_signal(self) -> tuple[bool, float, float]:
         """
-        Evaluate whether to trade this window and place both limit orders.
-        Returns True if orders placed, False if window skipped.
+        Check signal on CURRENT market. Returns (good, yes_mid, no_mid).
+        GOOD: STABLE_MIN <= yes_mid <= STABLE_MAX and yes_mid < CLEAR_THRESHOLD
         """
-        slug_s = _slug_short(self.current_market.get("slug", "?"))
+        current_ts = self._get_current_window_ts()
+        current_market = self._find_market_by_ts(current_ts)
 
-        # Step 1: Check if market is uncertain enough (close to 50/50)
-        if yes_mid < MIN_YES_MID or yes_mid > MAX_YES_MID:
-            self.state.skipped = True
-            self.state.skip_reason = f"not 50/50 (YES_mid={yes_mid:.3f})"
-            print(f"\n  [SKIP] {self.state.skip_reason}")
-            return False
+        if not current_market or len(current_market.get("token_ids", [])) < 2:
+            return False, 0.0, 0.0
 
-        # Step 2: Calculate order prices and check edge
-        yes_price = round(yes_mid - self.spread, 2)
-        no_price  = round(no_mid - self.spread, 2)
-        combined  = yes_price + no_price
+        token_ids = current_market["token_ids"]
+        yes_mid = self._fetch_midpoint(token_ids[0])
+        no_mid  = self._fetch_midpoint(token_ids[1])
 
-        if combined >= MAX_PAIR_COST:
-            self.state.skipped = True
-            self.state.skip_reason = f"edge too small ({combined:.3f} >= {MAX_PAIR_COST})"
-            print(f"\n  [SKIP] {self.state.skip_reason}")
-            return False
+        if yes_mid <= 0.01 or no_mid <= 0.01:
+            return False, yes_mid, no_mid
 
-        # Step 3: Place both orders
-        self.state.yes_order_price = yes_price
-        self.state.no_order_price  = no_price
+        good = (STABLE_MIN <= yes_mid <= STABLE_MAX
+                and yes_mid < CLEAR_THRESHOLD
+                and no_mid < CLEAR_THRESHOLD)
+        return good, yes_mid, no_mid
 
-        yes_shares = round(self.order_size / yes_price, 2)
-        no_shares  = round(self.order_size / no_price, 2)
-        self.state.yes_shares = yes_shares
-        self.state.no_shares  = no_shares
+    # ── Pre-order placement ───────────────────────────────────────────────────
 
-        edge_pct = round((1.0 - combined) * 100, 1)
-        print(f"\n  Midpoints: YES={yes_mid:.4f} NO={no_mid:.4f}")
-        print(f"  Orders:    YES@{yes_price} ({yes_shares}sh) + NO@{no_price} ({no_shares}sh)")
-        print(f"  Combined:  ${combined:.2f} | edge {edge_pct}%")
+    def _place_pre_orders(self):
+        """Place YES and NO limit buys on the NEXT window's market."""
+        next_ts = self._get_next_window_ts()
+        slug = f"btc-updown-15m-{next_ts}"
+        slug_s = _slug_short(slug)
+
+        # Find next market
+        market = self._find_market_by_ts(next_ts)
+        if not market:
+            print(f"\n  [!] Next market not found: {slug}")
+            return
+
+        token_ids = market["token_ids"]
+        self.state.window_ts = next_ts
+        self.state.next_market_slug = slug
+        self.state.yes_token_id = token_ids[0]
+        self.state.no_token_id  = token_ids[1]
+
+        now = time.time()
+        price = self.price_limit
+        shares = self.shares
 
         if self.dry_run:
-            self.state.yes_order_id = "DRY-YES"
-            self.state.no_order_id  = "DRY-NO"
-            print(f"\n  [DRY] Would place YES@{yes_price} + NO@{no_price} | {slug_s}")
+            self.state.yes_order_id = f"DRY-YES-{next_ts}"
+            self.state.no_order_id  = f"DRY-NO-{next_ts}"
+            print(f"\n  [DRY] Would place YES@{price} + NO@{price} x{shares}sh on {slug_s}")
         else:
-            token_ids = self.current_market.get("token_ids", [])
-            yes_id, yes_err = self._submit_order(token_ids[0], yes_price, yes_shares, "YES")
-            no_id,  no_err  = self._submit_order(token_ids[1], no_price,  no_shares,  "NO")
+            yes_id, yes_err = self._submit_order(token_ids[0], price, shares, "YES")
+            no_id,  no_err  = self._submit_order(token_ids[1], price, shares, "NO")
             self.state.yes_order_id = yes_id
             self.state.no_order_id  = no_id
 
@@ -304,129 +372,136 @@ class GabagoolTrader:
             if not no_id:
                 errors.append(f"NO: {no_err[:200]}")
             if errors:
-                msg = f"⚠️ Order error: {'; '.join(errors)} | {slug_s}"
+                msg = f"⚠️ Order error: {'; '.join(errors)}"
                 print(f"\n  [!] {msg}")
                 send_telegram(msg)
-                if not yes_id and not no_id:
-                    return False
 
-        msg = (f"📋 Orders placed: YES@{yes_price} + NO@{no_price}"
-               f" = ${combined:.2f} ({edge_pct}% edge) | {slug_s}")
-        print(f"\n  [ORDERS] {msg}")
+        self.state.yes_order_placed_at = now
+        self.state.no_order_placed_at  = now
+        self.state.orders_placed = True
+
+        combined = price * 2
+        edge_pct = round((1.0 - combined) * 100, 1)
+        msg = (f"📋 PRE-ORDER: YES@{price} + NO@{price} = ${combined:.2f}"
+               f" ({edge_pct}% edge) x{shares}sh | {slug_s}")
+        print(f"\n  [PRE-ORDER] {msg}")
         send_telegram(msg)
-        return True
 
-    # ── Step 4: Fill checking ─────────────────────────────────────────────────
+        self.logger.start_new_session(slug)
 
-    def _check_fills(self, yes_mid: float, no_mid: float):
-        """Check fill status. LIVE polls exchange, DRY RUN simulates."""
+    # ── Fill checking ─────────────────────────────────────────────────────────
+
+    def _check_fills(self):
+        """Check fill status for active orders."""
         if self.dry_run:
-            self._simulate_fills(yes_mid, no_mid)
+            self._check_fills_dry()
         else:
-            self._poll_live_fills()
+            self._check_fills_live()
 
-    def _poll_live_fills(self):
-        """Poll exchange for order fill status (LIVE mode)."""
+        # Pair complete alert (once)
+        if self.state.both_filled and not self.state.pair_alerted:
+            self._on_pair_complete()
+
+    def _check_fills_live(self):
+        """LIVE: poll exchange for fill status."""
         if self.state.yes_order_id and not self.state.yes_filled:
-            self._poll_order_fill("YES", self.state.yes_order_id, self.state.yes_order_price)
+            if self.state.yes_order_id.startswith("DRY-"):
+                return
+            try:
+                resp = self.clob.get_order(self.state.yes_order_id)
+                status = resp.get("status", "") if isinstance(resp, dict) else ""
+                if status in ("MATCHED", "FILLED"):
+                    fill_price = float(resp.get("price", self.price_limit))
+                    self._record_fill("YES", fill_price)
+            except Exception as e:
+                print(f"\n  [!] Fill check failed (YES): {e}")
 
         if self.state.no_order_id and not self.state.no_filled:
-            self._poll_order_fill("NO", self.state.no_order_id, self.state.no_order_price)
+            if self.state.no_order_id.startswith("DRY-"):
+                return
+            try:
+                resp = self.clob.get_order(self.state.no_order_id)
+                status = resp.get("status", "") if isinstance(resp, dict) else ""
+                if status in ("MATCHED", "FILLED"):
+                    fill_price = float(resp.get("price", self.price_limit))
+                    self._record_fill("NO", fill_price)
+            except Exception as e:
+                print(f"\n  [!] Fill check failed (NO): {e}")
 
-        if self.state.both_filled and not self.state.pair_alerted:
-            self._on_pair_complete()
+    def _check_fills_dry(self):
+        """DRY RUN: simulate fill when midpoint drops to or below limit price."""
+        if not self.state.yes_token_id or not self.state.no_token_id:
+            return
 
-    def _poll_order_fill(self, side: str, order_id: str, order_price: float):
-        try:
-            resp   = self.clob.get_order(order_id)
-            status = resp.get("status", "") if isinstance(resp, dict) else ""
-            if status in ("MATCHED", "FILLED"):
-                fill_price = float(resp.get("price", order_price))
-                self._record_fill(side, fill_price)
-        except Exception as e:
-            print(f"\n  [!] Fill check failed ({side}): {e}")
+        if not self.state.yes_filled and self.state.yes_order_id:
+            yes_mid = self._fetch_midpoint(self.state.yes_token_id)
+            if yes_mid > 0.02 and yes_mid <= self.price_limit:
+                self._record_fill("YES", self.price_limit)
 
-    def _simulate_fills(self, yes_mid: float, no_mid: float):
-        """DRY RUN: simulate fill when midpoint drops to or below order price."""
-        if not self.state.yes_filled and yes_mid > 0.02 and yes_mid <= self.state.yes_order_price:
-            self._record_fill("YES", self.state.yes_order_price)
-
-        if not self.state.no_filled and no_mid > 0.02 and no_mid <= self.state.no_order_price:
-            self._record_fill("NO", self.state.no_order_price)
-
-        if self.state.both_filled and not self.state.pair_alerted:
-            self._on_pair_complete()
+        if not self.state.no_filled and self.state.no_order_id:
+            no_mid = self._fetch_midpoint(self.state.no_token_id)
+            if no_mid > 0.02 and no_mid <= self.price_limit:
+                self._record_fill("NO", self.price_limit)
 
     def _record_fill(self, side: str, fill_price: float):
-        ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
+        ts_str = datetime.now(timezone.utc).strftime("%H:%M:%S")
+        now = time.time()
+        sim = " (sim)" if self.dry_run else ""
+
         if side == "YES" and not self.state.yes_filled:
-            self.state.yes_filled     = True
+            self.state.yes_filled = True
             self.state.yes_fill_price = fill_price
-            sim = " (sim)" if self.dry_run else ""
-            print(f"\n  [FILL] YES @ {fill_price}{sim} at {ts}")
+            self.state.yes_fill_time = now
+            print(f"\n  [FILL] YES @ {fill_price}{sim} at {ts_str}")
         elif side == "NO" and not self.state.no_filled:
-            self.state.no_filled     = True
+            self.state.no_filled = True
             self.state.no_fill_price = fill_price
-            sim = " (sim)" if self.dry_run else ""
-            print(f"\n  [FILL] NO @ {fill_price}{sim} at {ts}")
+            self.state.no_fill_time = now
+            print(f"\n  [FILL] NO @ {fill_price}{sim} at {ts_str}")
 
     def _on_pair_complete(self):
-        """Send alert when both sides fill. Called exactly once per window."""
+        """Alert when both sides fill. Called once."""
         self.state.pair_alerted = True
         self.total_pairs += 1
 
-        slug_s = _slug_short(self.current_market.get("slug", "?"))
-        s      = self.state
-        shares = min(s.yes_shares, s.no_shares)
-        net    = round(s.edge * shares, 2)
+        s = self.state
+        slug_s = _slug_short(s.next_market_slug)
+        profit = round(s.edge * self.shares, 2)
         pct    = round((1.0 - s.pair_cost) * 100, 1)
+        self.total_profit += profit
 
         msg = (
             f"✅ PAIR: YES@{s.yes_fill_price} + NO@{s.no_fill_price}"
-            f" = ${s.pair_cost:.2f} -> $1.00 = +${net:.2f} ({pct}% edge)\n"
+            f" = ${s.pair_cost:.2f} -> $1.00 = +${profit:.2f} ({pct}% edge)\n"
             f"Window: {slug_s}"
         )
         print(f"\n  [PAIR] {msg}")
         send_telegram(msg)
 
-    # ── Terminal display ──────────────────────────────────────────────────────
+    # ── Cancel open orders ────────────────────────────────────────────────────
 
-    def _print_status(self, yes_mid: float, no_mid: float, tick_num: int):
-        mode_tag = "[DRY]" if self.dry_run else "[LIVE]"
-        s = self.state
+    def _cancel_all_open_orders(self):
+        if self.dry_run:
+            self.state.yes_order_id = None
+            self.state.no_order_id = None
+            return
+        try:
+            self.clob.cancel_all()
+        except Exception as e:
+            print(f"\n[!] cancel_all failed: {e}")
 
-        yes_status = "FILLED" if s.yes_filled else "open"
-        no_status  = "FILLED" if s.no_filled  else "open"
-        pair_tag   = " PAIR!" if s.both_filled else ""
-
-        print(
-            f"  YES_mid={yes_mid:.4f} NO_mid={no_mid:.4f}"
-            f" | YES@{s.yes_order_price}({yes_status})"
-            f" NO@{s.no_order_price}({no_status})"
-            f"{pair_tag} | tick#{tick_num} {mode_tag}",
-            end="\r",
-        )
-
-    # ── Step 5: Window summary ────────────────────────────────────────────────
+    # ── Window summary ────────────────────────────────────────────────────────
 
     def _send_window_summary(self):
-        slug   = self.current_market.get("slug", "?")
-        slug_s = _slug_short(slug)
         s      = self.state
+        slug_s = _slug_short(s.next_market_slug) if s.next_market_slug else "?"
 
-        min_yes_str = f"{s.seen_min_yes:.4f}" if s.seen_min_yes != float("inf") else "n/a"
-        min_no_str  = f"{s.seen_min_no:.4f}"  if s.seen_min_no  != float("inf") else "n/a"
-
-        if s.skipped:
-            result_line = f"⏭️ SKIP: {s.skip_reason}"
-            self.total_skipped += 1
-        elif s.both_filled:
-            shares = min(s.yes_shares, s.no_shares)
-            net    = round(s.edge * shares, 2)
+        if s.both_filled:
+            profit = round(s.edge * self.shares, 2)
             pct    = round((1.0 - s.pair_cost) * 100, 1)
             result_line = (
                 f"✅ PAIR: YES@{s.yes_fill_price} + NO@{s.no_fill_price}"
-                f" = ${s.pair_cost:.2f} -> $1.00 = +${net:.2f} profit ({pct}% edge)"
+                f" = ${s.pair_cost:.2f} -> +${profit:.2f} ({pct}% edge)"
             )
         elif s.yes_filled:
             result_line = f"⚠️ INCOMPLETE: only YES filled @ {s.yes_fill_price} — DIRECTIONAL BET"
@@ -435,11 +510,11 @@ class GabagoolTrader:
             result_line = f"⚠️ INCOMPLETE: only NO filled @ {s.no_fill_price} — DIRECTIONAL BET"
             self.total_incomplete += 1
         elif s.orders_placed:
-            result_line = "😴 NO FILLS: orders placed but expired"
+            result_line = "😴 NO FILLS: orders placed but neither filled"
             self.total_no_fills += 1
         else:
-            result_line = "😴 No orders placed"
-            self.total_no_fills += 1
+            result_line = f"⏭️ SKIP: signal check failed"
+            self.total_skipped += 1
 
         bal_str = self._balance_str()
         bal_line = f"💰 Balance: {bal_str}"
@@ -448,22 +523,20 @@ class GabagoolTrader:
         stats_line = (
             f"📊 pairs: {self.total_pairs}, incomplete: {self.total_incomplete},"
             f" skipped: {self.total_skipped}, empty: {self.total_no_fills}"
-            f" / total: {self.window_count} windows | {pair_rate:.1f}% pair rate"
+            f" / total: {self.window_count} windows"
+            f" | {pair_rate:.1f}% pair rate | profit: ${self.total_profit:.2f}"
         )
 
         console_msg = (
             f"\n\n[SUMMARY] {slug_s}\n"
             f"{result_line}\n"
-            f"Lowest: YES={min_yes_str} NO={min_no_str}\n"
             f"{bal_line}\n"
             f"{stats_line}"
         )
         print(console_msg)
 
-        # Telegram: pairs already sent live; incomplete always; skips/no-fills never
-        if s.both_filled:
-            pass
-        elif s.yes_filled or s.no_filled:
+        # Telegram: pairs already sent live; incomplete always
+        if not s.both_filled and (s.yes_filled or s.no_filled):
             side  = "YES" if s.yes_filled else "NO"
             price = s.yes_fill_price if s.yes_filled else s.no_fill_price
             send_telegram(
@@ -474,39 +547,6 @@ class GabagoolTrader:
         if self.window_count % 5 == 0 and self.window_count > 0:
             send_telegram(f"{bal_line}\n{stats_line}")
 
-    # ── Cancel open orders ────────────────────────────────────────────────────
-
-    def _cancel_all_open_orders(self):
-        if self.dry_run:
-            print("\n  [DRY RUN] Would cancel all open orders")
-            return
-        try:
-            self.clob.cancel_all()
-            print("\n[*] Cancelled all open orders")
-        except Exception as e:
-            print(f"\n[!] cancel_all failed: {e}")
-
-    # ── Market lifecycle ──────────────────────────────────────────────────────
-
-    def _find_market(self) -> bool:
-        print("\n[*] Searching for active BTC 15-min market...")
-        market = self.finder.find_current_btc_15m()
-        if not market:
-            print("[!] No active market found. Will retry in 30s.")
-            return False
-
-        self.current_market = market
-        self.state          = WindowState()
-
-        print(f"[+] Found: {market['question']}")
-        print(f"    Slug:  {market['slug']}")
-        if market.get("prices"):
-            print(f"    Prices: YES={market['prices'][0]:.4f}  NO={market['prices'][1]:.4f}")
-        print(f"    Order size: ${self.order_size}/side | Spread: {self.spread}")
-
-        self.logger.start_new_session(market["slug"])
-        return True
-
     # ── Main loop ─────────────────────────────────────────────────────────────
 
     def run(self):
@@ -514,92 +554,107 @@ class GabagoolTrader:
         bal_str = self._balance_str()
 
         print("=" * 60)
-        print(f"  🤖 Gabagool Trader — {mode_label}")
-        print(f"  Order size      : ${self.order_size}/side")
-        print(f"  Spread          : {self.spread}")
-        print(f"  Max pair cost   : {MAX_PAIR_COST}")
-        print(f"  Mid range       : [{MIN_YES_MID}, {MAX_YES_MID}]")
+        print(f"  🤖 Gabagool Pre-Order — {mode_label}")
+        print(f"  Price limit     : {self.price_limit}")
+        print(f"  Shares/order    : {self.shares}")
+        print(f"  Pre-order       : {PLACE_ORDER_BEFORE_SECS}s before window")
+        print(f"  Signal range    : [{STABLE_MIN}, {STABLE_MAX}]")
         print(f"  Balance         : {bal_str}")
         print("  Ctrl+C to stop")
         print("=" * 60)
 
         send_telegram(
-            f"🤖 Gabagool | {mode_label} | Balance: {bal_str}\n"
-            f"Size: ${self.order_size}/side | Spread: {self.spread}"
+            f"🤖 Gabagool Pre-Order | {mode_label} | Balance: {bal_str}\n"
+            f"Price: {self.price_limit} | Shares: {self.shares}"
         )
 
         self.running = True
+        last_fill_check = 0.0
 
         while self.running:
-            if not self._find_market():
-                time.sleep(30)
-                continue
+            now = time.time()
+            next_ts = self._get_next_window_ts()
+            secs_to_next = next_ts - now
 
-            # Fetch opening prices
-            result = self._fetch_prices()
-            if result is None or result[0] <= 0.01 or result[1] <= 0.01:
-                print("[!] Bad price data. Retrying in 30s.")
-                time.sleep(30)
-                continue
+            # ── Phase 1: Waiting / Signal check / Pre-order ───────
+            if not self.state.orders_placed:
+                if secs_to_next <= PLACE_ORDER_BEFORE_SECS:
+                    # Time to check signal and place orders
+                    good, yes_mid, no_mid = self._check_signal()
 
-            yes_mid, no_mid = result
+                    if good:
+                        print(f"\n  [SIGNAL] GOOD: YES={yes_mid:.3f} NO={no_mid:.3f}"
+                              f" | placing orders {secs_to_next:.0f}s before window")
+                        self._place_pre_orders()
+                    else:
+                        if yes_mid >= CLEAR_THRESHOLD or no_mid >= CLEAR_THRESHOLD:
+                            reason = f"market decided (YES={yes_mid:.3f} NO={no_mid:.3f})"
+                        elif yes_mid <= 0.01 or no_mid <= 0.01:
+                            reason = f"bad price data (YES={yes_mid:.3f} NO={no_mid:.3f})"
+                        else:
+                            reason = f"outside range (YES={yes_mid:.3f} NO={no_mid:.3f})"
 
-            # Evaluate window and place orders
-            orders_placed = self._place_window_orders(yes_mid, no_mid)
+                        print(f"\n  [SKIP] Bad signal: {reason}")
+                        self.state.signal_checked = True
+                        # Wait until this window passes, then reset
+                        self.state.window_ts = next_ts
+                else:
+                    # Still waiting
+                    print(
+                        f"  [WAITING] secs_to_next={secs_to_next:.0f}"
+                        f" | pre-order in {secs_to_next - PLACE_ORDER_BEFORE_SECS:.0f}s"
+                        f" {('[DRY]' if self.dry_run else '[LIVE]')}",
+                        end="\r",
+                    )
 
-            # Monitor window for fills
-            print(f"\n[*] Monitoring window ({WINDOW_DURATION}s, poll every {POLL_INTERVAL}s)...\n")
-            window_start    = time.time()
-            last_fill_check = 0.0
-            tick_num        = 0
+            # ── Phase 2: Monitoring fills ─────────────────────────
+            elif self.state.orders_placed:
+                # Check fills
+                if now - last_fill_check >= FILL_CHECK_INTERVAL:
+                    self._check_fills()
+                    last_fill_check = now
 
-            while self.running:
-                now = time.time()
-                tick_num += 1
+                # Status line
+                slug_s = _slug_short(self.state.next_market_slug)
+                mode_tag = "[DRY]" if self.dry_run else "[LIVE]"
+                yes_s = f"FILLED@{self.state.yes_fill_price}" if self.state.yes_filled else "open"
+                no_s  = f"FILLED@{self.state.no_fill_price}"  if self.state.no_filled  else "open"
+                pair  = " PAIR!" if self.state.both_filled else ""
 
-                # Fetch current prices every POLL_INTERVAL
-                result = self._fetch_prices()
-                if result is not None:
-                    yes_mid, no_mid = result
+                secs_into = WINDOW_SECS - secs_to_next if secs_to_next < WINDOW_SECS else 0
+                print(
+                    f"  YES@{self.price_limit}({yes_s}) NO@{self.price_limit}({no_s})"
+                    f"{pair} | {slug_s} {secs_into:.0f}s {mode_tag}",
+                    end="\r",
+                )
 
-                    # Track price mins
-                    if yes_mid > 0.02:
-                        self.state.seen_min_yes = min(self.state.seen_min_yes, yes_mid)
-                    if no_mid > 0.02:
-                        self.state.seen_min_no = min(self.state.seen_min_no, no_mid)
-
-                    # CSV log
-                    self.logger.log(yes_mid, no_mid, 0, 0, 0, 0, source="rest")
-
-                    # Check fills every FILL_CHECK_INTERVAL
-                    if orders_placed and (now - last_fill_check >= FILL_CHECK_INTERVAL):
-                        self._check_fills(yes_mid, no_mid)
-                        last_fill_check = now
-
-                    # Print status line
-                    if orders_placed:
-                        self._print_status(yes_mid, no_mid, tick_num)
-
-                # Window expiry
-                elapsed = now - window_start
-                if elapsed > WINDOW_DURATION:
-                    self._cancel_all_open_orders()
-                    self.window_count += 1
-                    self._send_window_summary()
-                    print(f"\n[*] Window expired after {elapsed:.0f}s.")
-                    break
-
-                try:
-                    time.sleep(POLL_INTERVAL)
-                except KeyboardInterrupt:
-                    self.running = False
-                    break
-
-            if self.running:
+            # ── Window expiry: reset when next window starts ──────
+            if self.state.window_ts > 0 and now >= self.state.window_ts + WINDOW_SECS:
                 self._cancel_all_open_orders()
-                print("\n[*] Looking for next window...")
-                time.sleep(5)
+                self.window_count += 1
+                self._send_window_summary()
+                window_slug = _slug_short(self.state.next_market_slug)
+                print(f"\n[*] Window {window_slug} ended.")
+                self.state = WindowState()
+                last_fill_check = 0.0
+                continue
 
+            # Also reset if signal was bad and we've passed the window start
+            if (self.state.signal_checked and not self.state.orders_placed
+                    and self.state.window_ts > 0 and now >= self.state.window_ts):
+                self.window_count += 1
+                self._send_window_summary()
+                self.state = WindowState()
+                last_fill_check = 0.0
+                continue
+
+            try:
+                time.sleep(CHECK_INTERVAL)
+            except KeyboardInterrupt:
+                self.running = False
+                break
+
+        self._cancel_all_open_orders()
         self.logger.close()
         print("\n\n⛔ Stopped")
 
@@ -607,18 +662,18 @@ class GabagoolTrader:
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 def main():
-    parser = argparse.ArgumentParser(description="Gabagool BTC 15-min automated trader")
+    parser = argparse.ArgumentParser(description="Gabagool BTC 15-min pre-order trader")
     parser.add_argument(
         "--live", action="store_true",
         help="Enable LIVE trading (real money). Default is DRY RUN.",
     )
     parser.add_argument(
-        "--order-size", type=float, default=ORDER_SIZE,
-        help=f"USDC per side (default: {ORDER_SIZE})",
+        "--shares", type=int, default=SHARES,
+        help=f"Shares per order (default: {SHARES})",
     )
     parser.add_argument(
-        "--spread", type=float, default=SPREAD,
-        help=f"Spread below midpoint for limit orders (default: {SPREAD})",
+        "--price-limit", type=float, default=PRICE_LIMIT,
+        help=f"Limit buy price for both sides (default: {PRICE_LIMIT})",
     )
     args = parser.parse_args()
 
@@ -628,7 +683,7 @@ def main():
         print()
         print("!" * 60)
         print("  ⚠️  LIVE MODE — REAL MONEY WILL BE SPENT ⚠️")
-        print(f"  ${args.order_size}/side  —  spread: {args.spread}")
+        print(f"  {args.shares}sh/order @ ${args.price_limit}/side")
         print("  Press Ctrl+C NOW to abort, or wait 5 seconds to continue...")
         print("!" * 60)
         print()
@@ -640,8 +695,8 @@ def main():
 
     trader = GabagoolTrader(
         dry_run=dry_run,
-        order_size=args.order_size,
-        spread=args.spread,
+        shares=args.shares,
+        price_limit=args.price_limit,
     )
     try:
         trader.run()
