@@ -42,7 +42,7 @@ FILL_CHECK_INTERVAL = 1.0      # Check fills every 1s
 STABLE_MIN = 0.30              # Good signal: prices in this range
 STABLE_MAX = 0.70
 CLEAR_THRESHOLD = 0.90         # Bad signal: one side above this
-DANGER_PRICE = 0.28            # Sell one-sided fill if price drops below
+DANGER_PRICE = 0.14            # Sell one-sided fill if price drops below
 DANGER_TIME_SECS = 900         # Sell one-sided fill after 15 min
 WINDOW_SECS = 900              # 15 minutes
 
