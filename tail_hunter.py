@@ -1,686 +1,1057 @@
 """
-Tail Hunter — Paper Trading Bot for BTC 5-Min Extreme Positions
+Gabagool Strategy v2 — Pre-Order 15-Minute Markets
 
-Стратегия: покупаем позицию когда цена <= порога (x33-x100 payout).
-Мониторинг цен в РЕАЛЬНОМ ВРЕМЕНИ через Polymarket WebSocket.
+Places limit buy orders on BOTH sides before the next window starts,
+when the market is still ~50/50. Monitors fills during the window.
+If both fill → guaranteed profit from the complete set (YES+NO = $1.00).
 
-Два режима получения цен:
-1. WebSocket (основной) — мгновенные обновления при каждом изменении
-2. REST polling (фолбэк) — каждые 5 сек если WS не подключён
+Fixes over v1:
+  - Aggressive danger sell (price below midpoint for guaranteed exit)
+  - Sell-opposite logic (if one side >= SELL_OPPOSITE_THRESHOLD, sell the loser early)
+  - Higher DANGER_PRICE (0.25 vs 0.14) to cut losses faster
+  - Auto-redemption attempt after window close
+  - Retry logic with exponential backoff on order submission
+  - Separated concerns: timing, orders, risk management
+  - Better fill detection with partial fill support
 
-Запуск:
-    python tail_hunter.py                    # стандартный режим
-    python tail_hunter.py --balance 50       # стартовый баланс $50
-    python tail_hunter.py --threshold 0.03   # покупать при цене <= $0.03
-    python tail_hunter.py --bet-size 1       # ставка $1 за сделку
-
-Зависимости: pip install httpx websockets python-dotenv
+Usage:
+    python trader_v2.py                           # DRY RUN (safe)
+    python trader_v2.py --live                    # LIVE (real money!)
+    python trader_v2.py --live --shares 5 --price-limit 0.45
 """
 
 import argparse
-import asyncio
 import json
+import math
+import os
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone, timedelta
-from pathlib import Path
+from datetime import datetime, timezone
 
 import httpx
-import websockets
+from dotenv import load_dotenv
 
+from py_clob_client.client import ClobClient
+from py_clob_client.clob_types import OrderArgs, OrderType
+from py_clob_client.order_builder.constants import BUY, SELL
+
+from observer import MarketFinder, PriceLogger
 from notifier import send_telegram
 
-# ── API endpoints ────────────────────────────────────────────────────────────
+load_dotenv()
+
+# ── Trading constants ─────────────────────────────────────────────────────────
+PRICE_LIMIT = 0.45
+SHARES = 5
+PLACE_ORDER_BEFORE_SECS = 120
+CHECK_INTERVAL = 0.5
+FILL_CHECK_INTERVAL = 1.0
+
+# Signal thresholds
+STABLE_MIN = 0.30
+STABLE_MAX = 0.70
+CLEAR_THRESHOLD = 0.90
+
+# Risk management
+DANGER_PRICE = 0.25              # v1 was 0.14 — too late, ~69% loss already
+DANGER_TIME_SECS = 900
+SELL_OPPOSITE_THRESHOLD = 0.84   # NEW: sell loser when winner hits this
+SELL_PRICE_DISCOUNT = 0.03       # Sell below midpoint for guaranteed fill
+
+WINDOW_SECS = 900
+
+# API endpoints
+CLOB_HOST = "https://clob.polymarket.com"
 GAMMA_API = "https://gamma-api.polymarket.com"
-CLOB_API = "https://clob.polymarket.com"
-WS_URL = "wss://ws-subscriptions-clob.polymarket.com/ws/market"
+CHAIN_ID = 137
 
-# ── Defaults ─────────────────────────────────────────────────────────────────
-DEFAULT_BALANCE = 20.0
-DEFAULT_BET_SIZE = 1.0
-DEFAULT_THRESHOLD = 0.02
-WINDOW_SECONDS = 300
-WAIT_AFTER_WINDOW = 30
-POLYMARKET_FEE = 0.02
-REST_FALLBACK_INTERVAL = 5
-
-LOG_DIR = Path("data/tail_hunter")
-LOG_DIR.mkdir(parents=True, exist_ok=True)
+# Order retry settings
+MAX_ORDER_RETRIES = 3
+RETRY_BASE_DELAY = 1.5
 
 
-# ── State ────────────────────────────────────────────────────────────────────
+# ── Helpers ───────────────────────────────────────────────────────────────────
 
-@dataclass
-class Trade:
-    timestamp: str
-    window_slug: str
-    side: str
-    entry_price: float
-    shares: float
-    bet_cost: float
-    result: str = ""
-    payout: float = 0.0
-    pnl: float = 0.0
+def _slug_short(slug: str) -> str:
+    """'btc-updown-15m-1773573300' → '15m-1773573300'"""
+    parts = slug.split("btc-updown-")
+    return parts[-1] if len(parts) > 1 else slug
 
+
+def _ts_str() -> str:
+    """Current UTC time as HH:MM:SS."""
+    return datetime.now(timezone.utc).strftime("%H:%M:%S")
+
+
+# ── Per-cycle state ──────────────────────────────────────────────────────────
 
 @dataclass
-class LivePrices:
-    up_mid: float = 0.0
-    down_mid: float = 0.0
-    up_best_bid: float = 0.0
-    up_best_ask: float = 0.0
-    down_best_bid: float = 0.0
-    down_best_ask: float = 0.0
-    last_update: float = 0.0
-    ws_connected: bool = False
-    update_count: int = 0
+class WindowState:
+    """All mutable state for a single 15-minute trading window."""
 
+    # Which window we placed orders for
+    window_ts: int = 0
+    next_market_slug: str = ""
+
+    # Orders
+    yes_order_id: str | None = None
+    no_order_id: str | None = None
+    yes_order_placed_at: float = 0.0
+    no_order_placed_at: float = 0.0
+
+    # Fills
+    yes_filled: bool = False
+    no_filled: bool = False
+    yes_fill_price: float = 0.0
+    no_fill_price: float = 0.0
+    yes_fill_time: float = 0.0
+    no_fill_time: float = 0.0
+
+    # Control flags
+    orders_placed: bool = False
+    signal_checked: bool = False
+    signal_attempted: bool = False
+    pair_alerted: bool = False
+    danger_sold: bool = False
+    opposite_sold: bool = False       # NEW: sell-opposite executed
+    redemption_attempted: bool = False  # NEW: auto-redemption tried
+
+    # First fill timestamp (for danger timeout)
+    fill_time: float = 0.0
+
+    # Token IDs for the target market
+    yes_token_id: str = ""
+    no_token_id: str = ""
+
+    # Condition ID for redemption
+    condition_id: str = ""
+
+    @property
+    def both_filled(self) -> bool:
+        return self.yes_filled and self.no_filled
+
+    @property
+    def one_filled(self) -> bool:
+        return (self.yes_filled or self.no_filled) and not self.both_filled
+
+    @property
+    def pair_cost(self) -> float:
+        return self.yes_fill_price + self.no_fill_price
+
+    @property
+    def edge(self) -> float:
+        """Profit per $1 payout after 2% winner fee."""
+        return round((1.0 - self.pair_cost) * 0.98, 4)
+
+
+# ── Session stats ────────────────────────────────────────────────────────────
 
 @dataclass
-class BotState:
-    balance: float = DEFAULT_BALANCE
-    initial_balance: float = DEFAULT_BALANCE
-    total_trades: int = 0
-    wins: int = 0
-    losses: int = 0
-    total_pnl: float = 0.0
-    trades: list = field(default_factory=list)
+class SessionStats:
+    """Cumulative stats across all windows in a session."""
+    total_pairs: int = 0
+    total_incomplete: int = 0
+    total_skipped: int = 0
+    total_no_fills: int = 0
+    total_danger_exits: int = 0
+    total_opposite_sells: int = 0
+    total_profit: float = 0.0
+    window_count: int = 0
 
 
-# ── Market Finder (5-min) ────────────────────────────────────────────────────
+# ── Main trader class ─────────────────────────────────────────────────────────
 
-class MarketFinder5m:
-    def __init__(self):
-        self.client = httpx.Client(timeout=15.0)
+class GabagoolTrader:
 
-    def _get_server_time(self) -> float:
+    def __init__(
+        self,
+        dry_run: bool = True,
+        shares: int = SHARES,
+        price_limit: float = PRICE_LIMIT,
+    ):
+        self.dry_run = dry_run
+        self.shares = shares
+        self.price_limit = price_limit
+
+        self.finder = MarketFinder()
+        self.logger = PriceLogger()
+        self.http = httpx.Client(timeout=10.0)
+
+        self.state = WindowState()
+        self.stats = SessionStats()
+        self.running = False
+
+        self.clob = self._init_clob_client()
+
+    # ── CLOB client ───────────────────────────────────────────────────────────
+
+    def _init_clob_client(self) -> ClobClient:
+        client = ClobClient(
+            host=CLOB_HOST,
+            key=os.getenv("POLY_PRIVATE_KEY"),
+            chain_id=CHAIN_ID,
+            signature_type=1,
+            funder=os.getenv("POLY_FUNDER_ADDRESS"),
+        )
+        client.set_api_creds(client.create_or_derive_api_creds())
+        return client
+
+    # ── Balance ───────────────────────────────────────────────────────────────
+
+    def _get_balance(self) -> float | None:
+        """Returns balance in USDC, or None if fetch fails."""
         try:
-            resp = self.client.get(f"{CLOB_API}/time", timeout=5.0)
-            if resp.status_code == 200:
-                return float(resp.text.strip().strip('"'))
+            resp = self.clob.get_balance_allowance()
+            if isinstance(resp, dict):
+                raw = float(resp.get("balance", 0) or 0)
+                return raw / 1e6 if raw > 10_000 else raw
         except Exception:
             pass
-        return datetime.now(timezone.utc).timestamp()
 
-    def _window_start_ts(self, base_ts: float, offset_min: int = 0) -> int:
-        t = datetime.fromtimestamp(base_ts, tz=timezone.utc) + timedelta(minutes=offset_min)
-        rounded_min = (t.minute // 5) * 5
-        interval_start = t.replace(minute=rounded_min, second=0, microsecond=0)
-        return int(interval_start.timestamp())
+        funder = os.getenv("POLY_FUNDER_ADDRESS", "")
+        if not funder:
+            return None
 
-    def _parse_market(self, m: dict) -> dict | None:
-        clob_token_ids = m.get("clobTokenIds", "")
-        if isinstance(clob_token_ids, str):
-            try:
-                clob_token_ids = json.loads(clob_token_ids)
-            except Exception:
-                clob_token_ids = []
-
-        outcomes = m.get("outcomes", "")
-        if isinstance(outcomes, str):
-            try:
-                outcomes = json.loads(outcomes)
-            except Exception:
-                outcomes = []
-
-        prices = m.get("outcomePrices", "")
-        if isinstance(prices, str):
-            try:
-                prices = [float(p) for p in json.loads(prices)]
-            except Exception:
-                prices = []
-
-        return {
-            "slug": m.get("slug", ""),
-            "question": m.get("question", ""),
-            "condition_id": m.get("conditionId", ""),
-            "token_ids": clob_token_ids,
-            "outcomes": outcomes,
-            "prices": prices,
-            "end_date": m.get("endDate", ""),
-        }
-
-    def find_current_btc_5m(self, quiet: bool = False) -> dict | None:
-        now_ts = self._get_server_time()
-        now_dt = datetime.fromtimestamp(now_ts, tz=timezone.utc)
-        if not quiet:
-            print(f"  Серверное время: {now_dt.strftime('%H:%M:%S')} UTC")
-
-        for offset in [0, -5, 5]:
-            ts = self._window_start_ts(now_ts, offset)
-            slug = f"btc-updown-5m-{ts}"
-            try:
-                resp = self.client.get(f"{GAMMA_API}/markets", params={"slug": slug})
-                if resp.status_code != 200:
-                    continue
-                data = resp.json()
-                markets = data if isinstance(data, list) else [data]
-                for m in markets:
-                    if not m or m.get("slug") != slug:
-                        continue
-                    if m.get("closed") or not m.get("acceptingOrders", False):
-                        continue
-                    if not quiet:
-                        print(f"  ✓ Найден: {slug}")
-                    return self._parse_market(m)
-            except Exception:
-                continue
-
-        # Фолбэк
         try:
-            resp = self.client.get(f"{GAMMA_API}/markets", params={
-                "active": "true", "closed": "false",
-                "limit": 50, "order": "startDate", "ascending": "false",
-            })
-            resp.raise_for_status()
-            for m in resp.json():
-                s = m.get("slug", "")
-                q = m.get("question", "").lower()
-                if ("btc-updown-5m" in s or
-                    ("bitcoin" in q and "5" in q and ("up" in q or "down" in q))):
-                    if not m.get("closed") and m.get("acceptingOrders", False):
-                        if not quiet:
-                            print(f"  ✓ Фолбэк: {s}")
-                        return self._parse_market(m)
+            r = self.http.get(
+                "https://data-api.polymarket.com/value",
+                params={"user": funder.lower()},
+            )
+            if r.status_code == 200:
+                data = r.json()
+                entries = data if isinstance(data, list) else [data]
+                for entry in entries:
+                    for key in ("portfolioValue", "value", "cashBalance", "balance"):
+                        if key in entry:
+                            return float(entry[key])
         except Exception:
             pass
+
         return None
 
-    def check_resolution(self, slug: str) -> str | None:
+    def _balance_str(self) -> str:
+        bal = self._get_balance()
+        return f"${bal:.2f}" if bal is not None else "n/a"
+
+    # ── Price fetching ────────────────────────────────────────────────────────
+
+    def _fetch_midpoint(self, token_id: str) -> float:
+        """Fetch current midpoint price for a token. Returns 0.0 on failure."""
         try:
-            resp = self.client.get(f"{GAMMA_API}/markets", params={"slug": slug})
+            r = self.http.get(
+                f"{CLOB_HOST}/midpoint",
+                params={"token_id": token_id},
+                timeout=5.0,
+            )
+            if r.status_code == 200:
+                mid = float(r.json().get("mid", 0))
+                if 0.02 < mid < 0.98:
+                    return mid
+        except Exception as e:
+            print(f"\n[!] Price fetch error: {e}")
+        return 0.0
+
+    def _fetch_best_bid(self, token_id: str) -> float:
+        """Fetch best bid price from order book. More accurate for selling."""
+        try:
+            r = self.http.get(
+                f"{CLOB_HOST}/book",
+                params={"token_id": token_id},
+                timeout=5.0,
+            )
+            if r.status_code == 200:
+                book = r.json()
+                bids = book.get("bids", [])
+                if bids:
+                    return float(bids[0].get("price", 0))
+        except Exception:
+            pass
+        return 0.0
+
+    # ── Order submission with retry ───────────────────────────────────────────
+
+    def _submit_order(
+        self,
+        token_id: str,
+        price: float,
+        shares: float,
+        side: str,
+        side_label: str,
+    ) -> tuple[str | None, str]:
+        """
+        Submits a GTC limit order with exponential backoff retry.
+        side: BUY or SELL constant.
+        Returns (order_id, error_str). order_id is None on failure.
+        """
+        for attempt in range(1, MAX_ORDER_RETRIES + 1):
+            try:
+                order_args = OrderArgs(
+                    token_id=token_id,
+                    price=round(price, 2),
+                    size=shares,
+                    side=side,
+                )
+                signed = self.clob.create_order(order_args)
+                resp = self.clob.post_order(signed, OrderType.GTC)
+                order_id = resp.get("orderID") if isinstance(resp, dict) else None
+
+                action = "BUY" if side == BUY else "SELL"
+                print(f"\n  [ORDER] {action} {side_label} @ {price} | "
+                      f"{shares}sh | ID: {order_id or '?'}")
+                return order_id, ""
+
+            except Exception as e:
+                err_str = str(e)
+                err_low = err_str.lower()
+                print(f"\n  [!] Order failed ({side_label} @ {price}) "
+                      f"attempt {attempt}/{MAX_ORDER_RETRIES}: {err_str}")
+
+                # Insufficient balance — no point retrying
+                if any(kw in err_low for kw in (
+                    "not enough", "balance", "allowance", "insufficient"
+                )):
+                    bal = self._get_balance()
+                    bal_s = f"${bal:.2f}" if bal is not None else "n/a"
+                    alert = f"⚠️ Low balance: {bal_s}"
+                    print(f"\n  [!] {alert}")
+                    send_telegram(alert)
+                    return None, err_str
+
+                # Retry with exponential backoff
+                if attempt < MAX_ORDER_RETRIES:
+                    delay = RETRY_BASE_DELAY * (2 ** (attempt - 1))
+                    time.sleep(delay)
+                    continue
+
+                return None, err_str
+
+        return None, "max retries exceeded"
+
+    # ── Window timing ─────────────────────────────────────────────────────────
+
+    def _get_next_window_ts(self) -> int:
+        now = time.time()
+        return int(math.ceil(now / WINDOW_SECS) * WINDOW_SECS)
+
+    def _get_current_window_ts(self) -> int:
+        now = time.time()
+        return int(math.floor(now / WINDOW_SECS) * WINDOW_SECS)
+
+    # ── Market lookup ─────────────────────────────────────────────────────────
+
+    def _find_market_by_ts(self, ts: int) -> dict | None:
+        """Look up a specific 15-min market by its window timestamp."""
+        slug = f"btc-updown-15m-{ts}"
+        try:
+            resp = self.http.get(
+                f"{GAMMA_API}/markets",
+                params={"slug": slug},
+                timeout=10.0,
+            )
             if resp.status_code != 200:
                 return None
+
             data = resp.json()
             markets = data if isinstance(data, list) else [data]
+
             for m in markets:
-                if m.get("slug") != slug:
+                if not m or m.get("slug") != slug:
                     continue
+
+                clob_ids = m.get("clobTokenIds", "")
+                if isinstance(clob_ids, str):
+                    try:
+                        clob_ids = json.loads(clob_ids)
+                    except Exception:
+                        clob_ids = []
+                if len(clob_ids) < 2:
+                    continue
+
                 prices = m.get("outcomePrices", "")
                 if isinstance(prices, str):
                     try:
                         prices = [float(p) for p in json.loads(prices)]
                     except Exception:
                         prices = []
-                outcomes = m.get("outcomes", "")
-                if isinstance(outcomes, str):
-                    try:
-                        outcomes = json.loads(outcomes)
-                    except Exception:
-                        outcomes = []
-                if (m.get("closed") or m.get("resolved")) and prices:
-                    for outcome, price in zip(outcomes, prices):
-                        if price >= 0.95:
-                            return outcome
-        except Exception:
-            pass
+
+                return {
+                    "slug": slug,
+                    "question": m.get("question", ""),
+                    "condition_id": m.get("conditionId", ""),
+                    "token_ids": clob_ids,
+                    "prices": prices,
+                }
+
+        except Exception as e:
+            print(f"\n[!] Market lookup error for {slug}: {e}")
         return None
 
+    # ── Signal check ──────────────────────────────────────────────────────────
 
-# ── Tail Hunter Bot ──────────────────────────────────────────────────────────
+    def _check_signal(self) -> tuple[bool, float, float]:
+        """
+        Check signal on CURRENT market.
+        Returns (good, yes_mid, no_mid).
+        Good = both prices in [STABLE_MIN, STABLE_MAX] and neither >= CLEAR_THRESHOLD.
+        """
+        market = self.finder.find_current_btc_15m()
+        if not market or len(market.get("token_ids", [])) < 2:
+            return False, 0.0, 0.0
 
-class TailHunterBot:
+        token_ids = market["token_ids"]
+        yes_mid = self._fetch_midpoint(token_ids[0])
+        no_mid = self._fetch_midpoint(token_ids[1])
 
-    def __init__(self, balance: float, bet_size: float, threshold: float):
-        self.finder = MarketFinder5m()
-        self.http = httpx.Client(timeout=10.0)
+        if yes_mid <= 0.01 or no_mid <= 0.01:
+            return False, yes_mid, no_mid
 
-        self.state = BotState(balance=balance, initial_balance=balance)
-        self.bet_size = bet_size
-        self.threshold = threshold
-        self.running = False
+        good = (
+            STABLE_MIN <= yes_mid <= STABLE_MAX
+            and yes_mid < CLEAR_THRESHOLD
+            and no_mid < CLEAR_THRESHOLD
+        )
+        return good, yes_mid, no_mid
 
-        self.prices = LivePrices()
-        self.current_slug = ""
-        self.current_market: dict | None = None
-        self.pending_trades: list[Trade] = []
-        self.bought_this_window = False
+    # ── Order placement ───────────────────────────────────────────────────────
 
-        self.log_file = LOG_DIR / f"trades_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
-        self._init_log()
+    def _place_orders_for_ts(self, target_ts: int, label: str = "PRE-ORDER"):
+        """Place YES and NO limit buys on the market at target_ts."""
+        slug = f"btc-updown-15m-{target_ts}"
+        slug_s = _slug_short(slug)
 
-    def _init_log(self):
-        with open(self.log_file, "w") as f:
-            f.write("timestamp,window_slug,side,entry_price,shares,"
-                    "bet_cost,result,payout,pnl,balance\n")
+        market = self._find_market_by_ts(target_ts)
+        if not market:
+            print(f"\n  [!] Market not found: {slug}")
+            return
 
-    def _log_trade(self, trade: Trade):
-        with open(self.log_file, "a") as f:
-            f.write(f"{trade.timestamp},{trade.window_slug},{trade.side},"
-                    f"{trade.entry_price:.4f},{trade.shares:.2f},"
-                    f"{trade.bet_cost:.4f},{trade.result},"
-                    f"{trade.payout:.4f},{trade.pnl:.4f},"
-                    f"{self.state.balance:.4f}\n")
+        token_ids = market["token_ids"]
+        self.state.window_ts = target_ts
+        self.state.next_market_slug = slug
+        self.state.yes_token_id = token_ids[0]
+        self.state.no_token_id = token_ids[1]
+        self.state.condition_id = market.get("condition_id", "")
 
-    @staticmethod
-    def _time_remaining() -> float:
-        now = datetime.now(timezone.utc)
-        rounded_min = (now.minute // 5) * 5
-        window_end = now.replace(minute=rounded_min, second=0, microsecond=0) + timedelta(minutes=5)
-        return max((window_end - now).total_seconds(), 0)
+        now = time.time()
+        price = self.price_limit
+        shares = self.shares
 
-    @staticmethod
-    def _current_window_ts() -> int:
-        now = datetime.now(timezone.utc)
-        rounded_min = (now.minute // 5) * 5
-        ws = now.replace(minute=rounded_min, second=0, microsecond=0)
-        return int(ws.timestamp())
-
-    def _get_buy_price(self, side: str) -> float:
-        if side == "UP":
-            mid, ask = self.prices.up_mid, self.prices.up_best_ask
+        if self.dry_run:
+            self.state.yes_order_id = f"DRY-YES-{target_ts}"
+            self.state.no_order_id = f"DRY-NO-{target_ts}"
+            print(f"\n  [DRY] Would place YES@{price} + NO@{price} "
+                  f"x{shares}sh on {slug_s}")
         else:
-            mid, ask = self.prices.down_mid, self.prices.down_best_ask
-
-        if mid <= 0:
-            return 0.0
-        # ask реалистичен только если не сильно больше midpoint
-        if 0 < ask <= mid * 3 and ask <= 0.5:
-            return ask
-        return mid
-
-    # ── WebSocket listener ───────────────────────────────────────────────
-
-    async def _ws_listener(self):
-        subscribed_tokens: set[str] = set()
-
-        while self.running:
-            try:
-                async with websockets.connect(WS_URL, ping_interval=20, ping_timeout=10) as ws:
-                    self.prices.ws_connected = True
-                    print("  📡 WebSocket подключён")
-
-                    while self.running:
-                        # Подписка на новые токены при смене рынка
-                        if self.current_market:
-                            tokens = set(self.current_market.get("token_ids", []))
-                            if tokens != subscribed_tokens and tokens:
-                                if subscribed_tokens:
-                                    await ws.send(json.dumps({
-                                        "type": "unsubscribe",
-                                        "channel": "market",
-                                        "assets_ids": list(subscribed_tokens),
-                                    }))
-                                await ws.send(json.dumps({
-                                    "type": "subscribe",
-                                    "channel": "market",
-                                    "assets_ids": list(tokens),
-                                }))
-                                subscribed_tokens = tokens
-
-                        try:
-                            raw = await asyncio.wait_for(ws.recv(), timeout=2.0)
-                        except asyncio.TimeoutError:
-                            continue
-
-                        self._process_ws_message(raw)
-
-            except websockets.exceptions.ConnectionClosed:
-                self.prices.ws_connected = False
-                print("\n  📡 WS отключён, переподключение...")
-                subscribed_tokens.clear()
-                await asyncio.sleep(2)
-            except Exception as e:
-                self.prices.ws_connected = False
-                print(f"\n  [!] WS: {e}")
-                subscribed_tokens.clear()
-                await asyncio.sleep(3)
-
-    def _process_ws_message(self, raw: str):
-        try:
-            data = json.loads(raw)
-        except json.JSONDecodeError:
-            return
-
-        messages = data if isinstance(data, list) else [data]
-
-        for msg in messages:
-            asset_id = msg.get("asset_id", "")
-            if not asset_id or not self.current_market:
-                continue
-
-            token_ids = self.current_market.get("token_ids", [])
-            if len(token_ids) < 2:
-                continue
-
-            # Определяем какой токен обновился
-            if asset_id == token_ids[0]:
-                prefix = "up"
-            elif asset_id == token_ids[1]:
-                prefix = "down"
-            else:
-                continue
-
-            # Обновляем цены из любых доступных полей
-            if msg.get("price"):
-                val = float(msg["price"])
-                if prefix == "up":
-                    self.prices.up_mid = val
-                else:
-                    self.prices.down_mid = val
-
-            if msg.get("best_bid"):
-                val = float(msg["best_bid"])
-                if prefix == "up":
-                    self.prices.up_best_bid = val
-                else:
-                    self.prices.down_best_bid = val
-
-            if msg.get("best_ask"):
-                val = float(msg["best_ask"])
-                if prefix == "up":
-                    self.prices.up_best_ask = val
-                else:
-                    self.prices.down_best_ask = val
-
-            # Вычисляем mid из bid/ask если price не пришёл
-            if not msg.get("price") and msg.get("best_bid") and msg.get("best_ask"):
-                bid = float(msg["best_bid"])
-                ask = float(msg["best_ask"])
-                if bid > 0 and ask > 0:
-                    mid = (bid + ask) / 2
-                    if prefix == "up":
-                        self.prices.up_mid = mid
-                    else:
-                        self.prices.down_mid = mid
-
-            self.prices.last_update = time.time()
-            self.prices.update_count += 1
-
-    # ── REST fallback ────────────────────────────────────────────────────
-
-    def _fetch_prices_rest(self):
-        if not self.current_market:
-            return
-        token_ids = self.current_market.get("token_ids", [])
-        if len(token_ids) < 2:
-            return
-
-        for prefix, token_id in zip(["up", "down"], token_ids[:2]):
-            try:
-                resp = self.http.get(f"{CLOB_API}/midpoint", params={"token_id": token_id})
-                if resp.status_code == 200:
-                    mid = float(resp.json().get("mid", 0))
-                    if prefix == "up":
-                        self.prices.up_mid = mid
-                    else:
-                        self.prices.down_mid = mid
-
-                resp = self.http.get(f"{CLOB_API}/book", params={"token_id": token_id})
-                if resp.status_code == 200:
-                    book = resp.json()
-                    bids, asks = book.get("bids", []), book.get("asks", [])
-                    if prefix == "up":
-                        if bids: self.prices.up_best_bid = float(bids[0]["price"])
-                        if asks: self.prices.up_best_ask = float(asks[0]["price"])
-                    else:
-                        if bids: self.prices.down_best_bid = float(bids[0]["price"])
-                        if asks: self.prices.down_best_ask = float(asks[0]["price"])
-            except Exception:
-                pass
-
-        self.prices.last_update = time.time()
-        self.prices.update_count += 1
-
-    # ── Trading logic ────────────────────────────────────────────────────
-
-    def _try_buy(self) -> list[Trade]:
-        if not self.current_market:
-            return []
-        trades = []
-        for side in ["UP", "DOWN"]:
-            price = self._get_buy_price(side)
-            if price <= 0 or price > self.threshold:
-                continue
-            if self.state.balance < self.bet_size:
-                break
-
-            shares = self.bet_size / price
-            trade = Trade(
-                timestamp=datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S"),
-                window_slug=self.current_slug,
-                side=side,
-                entry_price=price,
-                shares=shares,
-                bet_cost=self.bet_size,
-                result="PENDING",
+            yes_id, yes_err = self._submit_order(
+                token_ids[0], price, shares, BUY, "YES"
             )
-            self.state.balance -= self.bet_size
-            trades.append(trade)
-
-            potential = shares * (1 - POLYMARKET_FEE)
-            mult = potential / self.bet_size
-
-            print(f"\n\n  🎯 КУПИЛ {side} @ ${price:.4f}  |  "
-                  f"${self.bet_size:.2f} → {shares:.1f} шар  |  "
-                  f"x{mult:.0f} потенциал")
-
-            send_telegram(
-                f"🎯 TAIL HUNTER [PAPER]\n"
-                f"{side} @ ${price:.4f} | ${self.bet_size:.2f} → {shares:.1f} шар\n"
-                f"x{mult:.0f} | Окно: ...{self.current_slug[-10:]}\n"
-                f"Баланс: ${self.state.balance:.2f}"
+            no_id, no_err = self._submit_order(
+                token_ids[1], price, shares, BUY, "NO"
             )
-        return trades
+            self.state.yes_order_id = yes_id
+            self.state.no_order_id = no_id
 
-    def _resolve_trades(self):
-        if not self.pending_trades:
-            return
-        slug = self.pending_trades[0].window_slug
-        print(f"\n  ⏳ Resolution ...{slug[-10:]}...")
+            errors = []
+            if not yes_id:
+                errors.append(f"YES: {yes_err[:200]}")
+            if not no_id:
+                errors.append(f"NO: {no_err[:200]}")
+            if errors:
+                msg = f"⚠️ Order error: {'; '.join(errors)}"
+                print(f"\n  [!] {msg}")
+                send_telegram(msg)
 
-        resolution = None
-        for attempt in range(15):
-            time.sleep(4)
-            resolution = self.finder.check_resolution(slug)
-            if resolution:
-                break
-            if attempt % 3 == 0:
-                print(f"  ... попытка {attempt + 1}/15")
+        self.state.yes_order_placed_at = now
+        self.state.no_order_placed_at = now
+        self.state.orders_placed = True
 
-        if not resolution:
-            print(f"  ⚠️ Resolution timeout → LOSS")
-            resolution = "__UNKNOWN__"
+        combined = price * 2
+        edge_pct = round((1.0 - combined) * 100, 1)
+        msg = (
+            f"📋 {label}: YES@{price} + NO@{price} = ${combined:.2f}"
+            f" ({edge_pct}% edge) x{shares}sh | {slug_s}"
+        )
+        print(f"\n  [{label}] {msg}")
+        send_telegram(msg)
 
-        print(f"  📢 Результат: {resolution}")
+        self.logger.start_new_session(slug)
 
-        for trade in self.pending_trades:
-            won = ((trade.side == "UP" and resolution == "Up") or
-                   (trade.side == "DOWN" and resolution == "Down"))
+    # ── Fill checking ─────────────────────────────────────────────────────────
 
-            if won:
-                payout = trade.shares * (1 - POLYMARKET_FEE)
-                trade.result = "WIN"
-                trade.payout = payout
-                trade.pnl = payout - trade.bet_cost
-                self.state.balance += payout
-                self.state.wins += 1
-                print(f"  🏆 WIN {trade.side} → +${trade.pnl:.2f}")
-                send_telegram(f"🏆 WIN {trade.side} +${trade.pnl:.2f} | ${self.state.balance:.2f}")
-            else:
-                trade.result = "LOSS"
-                trade.pnl = -trade.bet_cost
-                self.state.losses += 1
-                print(f"  ❌ LOSS {trade.side} → -${trade.bet_cost:.2f}")
+    def _check_fills(self):
+        """Route to dry or live fill checking."""
+        if self.dry_run:
+            self._check_fills_dry()
+        else:
+            self._check_fills_live()
 
-            self.state.total_trades += 1
-            self.state.total_pnl += trade.pnl
-            self.state.trades.append(trade)
-            self._log_trade(trade)
+        if self.state.both_filled and not self.state.pair_alerted:
+            self._on_pair_complete()
 
-        self.pending_trades = []
-
-    def _print_status(self):
-        s = self.state
-        wr = (s.wins / s.total_trades * 100) if s.total_trades else 0
-        roi = ((s.balance - s.initial_balance) / s.initial_balance * 100)
-        print(f"\n{'─' * 60}")
-        print(f"  💰 ${s.balance:.2f} (start ${s.initial_balance:.2f}, ROI {roi:+.1f}%)")
-        print(f"  📊 {s.total_trades} trades  W:{s.wins} L:{s.losses}  WR:{wr:.0f}%")
-        print(f"  📈 PnL: ${s.total_pnl:+.2f}")
-        print(f"{'─' * 60}")
-
-    # ── Main loop ────────────────────────────────────────────────────────
-
-    async def _main_loop(self):
-        last_rest_fetch = 0
-        prev_window_ts = 0
-
-        while self.running:
+    def _check_fills_live(self):
+        """LIVE: poll exchange for fill status."""
+        for side, order_id, filled_flag in [
+            ("YES", self.state.yes_order_id, self.state.yes_filled),
+            ("NO", self.state.no_order_id, self.state.no_filled),
+        ]:
+            if not order_id or filled_flag:
+                continue
+            if order_id.startswith("DRY-"):
+                continue
             try:
-                now = time.time()
-                remaining = self._time_remaining()
-                window_ts = self._current_window_ts()
-
-                # ── Новое окно ───────────────────────────────────────
-                if window_ts != prev_window_ts:
-                    if self.pending_trades:
-                        self._resolve_trades()
-                        self._print_status()
-                        if self.state.balance < self.bet_size:
-                            print(f"\n  ⛔ Баланс исчерпан!")
-                            self.running = False
-                            break
-
-                    prev_window_ts = window_ts
-                    self.bought_this_window = False
-                    self.prices = LivePrices()
-
-                    print(f"\n\n  🔍 Новое окно...")
-                    market = self.finder.find_current_btc_5m()
-                    if market:
-                        self.current_market = market
-                        self.current_slug = market["slug"]
-                        short = market["slug"].split("btc-updown-5m-")[-1]
-                        print(f"  📌 {short} | {market['question']}")
-                    else:
-                        self.current_market = None
-                        print(f"  ⚠️ Рынок не найден")
-
-                # ── REST фолбэк ─────────────────────────────────────
-                ws_stale = (now - self.prices.last_update) > 5
-                if (not self.prices.ws_connected or ws_stale) and \
-                   (now - last_rest_fetch) >= REST_FALLBACK_INTERVAL:
-                    self._fetch_prices_rest()
-                    last_rest_fetch = now
-
-                # ── Display + buy logic ──────────────────────────────
-                if self.current_market and self.prices.last_update > 0:
-                    buy_up = self._get_buy_price("UP")
-                    buy_down = self._get_buy_price("DOWN")
-
-                    min_p = min(
-                        (p for p in [buy_up, buy_down] if p > 0), default=1.0
-                    )
-
-                    if min_p <= self.threshold:
-                        ind = "🔴"
-                    elif min_p <= self.threshold * 2:
-                        ind = "🟡"
-                    else:
-                        ind = "🟢"
-
-                    ws_tag = "WS" if self.prices.ws_connected else "REST"
-                    ts = datetime.now(timezone.utc).strftime("%H:%M:%S")
-
-                    if self.bought_this_window:
-                        print(f"\r  ⏳ [{ts}] HOLDING... "
-                              f"{remaining:.0f}с | ${self.state.balance:.2f}"
-                              "        ", end="", flush=True)
-                    else:
-                        print(f"\r  {ind} [{ts}] "
-                              f"UP={buy_up:.4f} DN={buy_down:.4f} "
-                              f"| {remaining:.0f}с "
-                              f"| ${self.state.balance:.2f} "
-                              f"| {ws_tag} #{self.prices.update_count}"
-                              "        ", end="", flush=True)
-
-                        # ПОКУПКА
-                        if min_p <= self.threshold and remaining > 10:
-                            trades = self._try_buy()
-                            if trades:
-                                self.pending_trades = trades
-                                self.bought_this_window = True
-
-                await asyncio.sleep(0.5)
-
+                resp = self.clob.get_order(order_id)
+                status = resp.get("status", "") if isinstance(resp, dict) else ""
+                if status in ("MATCHED", "FILLED"):
+                    fill_price = float(resp.get("price", self.price_limit))
+                    self._record_fill(side, fill_price)
             except Exception as e:
-                print(f"\n  [!] Loop: {e}")
-                await asyncio.sleep(2)
+                print(f"\n  [!] Fill check failed ({side}): {e}")
 
-    async def _run_async(self):
-        self.running = True
-
-        print("=" * 60)
-        print("  🎯 TAIL HUNTER — Real-Time Paper Trading")
-        print(f"  Баланс: ${self.state.balance:.2f}")
-        print(f"  Ставка: ${self.bet_size:.2f}")
-        print(f"  Порог: <= ${self.threshold:.4f} (x{1/self.threshold:.0f})")
-        print(f"  Цены: WebSocket (real-time) + REST (fallback)")
-        print(f"  Лог: {self.log_file}")
-        print(f"  Ctrl+C для остановки")
-        print("=" * 60)
-
-        ws_task = asyncio.create_task(self._ws_listener())
-        main_task = asyncio.create_task(self._main_loop())
-
-        try:
-            await asyncio.gather(ws_task, main_task)
-        except asyncio.CancelledError:
-            pass
-
-    def run(self):
-        try:
-            asyncio.run(self._run_async())
-        except KeyboardInterrupt:
-            print("\n\n⛔ Остановлено")
-            self.running = False
-            if self.pending_trades:
-                print("  Resolving open positions...")
-                remaining = self._time_remaining()
-                if remaining > 0:
-                    time.sleep(remaining + WAIT_AFTER_WINDOW)
-                self._resolve_trades()
-        self._final_report()
-
-    def _final_report(self):
-        s = self.state
-        if s.total_trades == 0:
-            print(f"\n  Сделок не было. Баланс: ${s.balance:.2f}")
+    def _check_fills_dry(self):
+        """DRY RUN: simulate fill when midpoint drops to or below limit price."""
+        if not self.state.yes_token_id or not self.state.no_token_id:
             return
-        wr = s.wins / s.total_trades * 100
-        roi = (s.balance - s.initial_balance) / s.initial_balance * 100
-        print(f"\n{'═' * 60}")
-        print(f"  📊 TAIL HUNTER ИТОГ")
-        print(f"{'═' * 60}")
-        print(f"  ${s.initial_balance:.2f} → ${s.balance:.2f} ({roi:+.1f}%)")
-        print(f"  Trades: {s.total_trades}  W:{s.wins} L:{s.losses}  WR:{wr:.0f}%")
-        print(f"  PnL: ${s.total_pnl:+.2f}")
-        print(f"  Лог: {self.log_file}")
-        print(f"{'═' * 60}")
-        send_telegram(
-            f"📊 TAIL HUNTER ИТОГ\n"
-            f"${s.initial_balance:.2f} → ${s.balance:.2f} ({roi:+.1f}%)\n"
-            f"Trades: {s.total_trades} W:{s.wins} L:{s.losses}\n"
-            f"PnL: ${s.total_pnl:+.2f}"
+
+        if not self.state.yes_filled and self.state.yes_order_id:
+            yes_mid = self._fetch_midpoint(self.state.yes_token_id)
+            if 0.02 < yes_mid <= self.price_limit:
+                self._record_fill("YES", self.price_limit)
+
+        if not self.state.no_filled and self.state.no_order_id:
+            no_mid = self._fetch_midpoint(self.state.no_token_id)
+            if 0.02 < no_mid <= self.price_limit:
+                self._record_fill("NO", self.price_limit)
+
+    def _record_fill(self, side: str, fill_price: float):
+        """Record a fill event for YES or NO side."""
+        now = time.time()
+        sim = " (sim)" if self.dry_run else ""
+
+        if side == "YES" and not self.state.yes_filled:
+            self.state.yes_filled = True
+            self.state.yes_fill_price = fill_price
+            self.state.yes_fill_time = now
+            if self.state.fill_time == 0.0:
+                self.state.fill_time = now
+            print(f"\n  [FILL] YES @ {fill_price}{sim} at {_ts_str()}")
+
+        elif side == "NO" and not self.state.no_filled:
+            self.state.no_filled = True
+            self.state.no_fill_price = fill_price
+            self.state.no_fill_time = now
+            if self.state.fill_time == 0.0:
+                self.state.fill_time = now
+            print(f"\n  [FILL] NO @ {fill_price}{sim} at {_ts_str()}")
+
+    def _on_pair_complete(self):
+        """Both sides filled — guaranteed profit. Called once."""
+        self.state.pair_alerted = True
+        self.stats.total_pairs += 1
+
+        s = self.state
+        slug_s = _slug_short(s.next_market_slug)
+        profit = round(s.edge * self.shares, 2)
+        pct = round((1.0 - s.pair_cost) * 100, 1)
+        self.stats.total_profit += profit
+
+        msg = (
+            f"✅ PAIR: YES@{s.yes_fill_price} + NO@{s.no_fill_price}"
+            f" = ${s.pair_cost:.2f} -> $1.00 = +${profit:.2f} ({pct}% edge)\n"
+            f"Window: {slug_s}"
+        )
+        print(f"\n  [PAIR] {msg}")
+        send_telegram(msg)
+
+    # ── Risk management ───────────────────────────────────────────────────────
+
+    def _check_danger(self, now: float):
+        """
+        Risk management for one-sided fills:
+        1. Price dropped below DANGER_PRICE → emergency sell
+        2. Timeout exceeded → sell to free capital
+        """
+        if not self.state.one_filled or self.state.danger_sold:
+            return
+
+        filled_side = "YES" if self.state.yes_filled else "NO"
+        filled_token = (
+            self.state.yes_token_id if self.state.yes_filled
+            else self.state.no_token_id
+        )
+        time_since_fill = now - self.state.fill_time
+        current_price = self._fetch_midpoint(filled_token)
+
+        danger = False
+        reason = ""
+
+        if 0.02 < current_price <= DANGER_PRICE:
+            danger = True
+            reason = f"price={current_price:.3f} <= {DANGER_PRICE}"
+        elif time_since_fill >= DANGER_TIME_SECS:
+            danger = True
+            reason = f"time={time_since_fill:.0f}s >= {DANGER_TIME_SECS}s"
+
+        if not danger:
+            return
+
+        self.state.danger_sold = True
+        self.stats.total_danger_exits += 1
+        slug_s = _slug_short(self.state.next_market_slug)
+
+        if self.dry_run:
+            print(f"\n  [DANGER] Would sell {filled_side} @ {current_price:.3f} "
+                  f"({reason})")
+        else:
+            self._cancel_all_open_orders()
+            self._sell_aggressive(filled_token, self.shares, filled_side)
+            print(f"\n  [DANGER] Selling {filled_side} aggressively ({reason})")
+
+        msg = (f"⚠️ DANGER EXIT: {filled_side} @ {current_price:.3f} "
+               f"({reason}) | {slug_s}")
+        send_telegram(msg)
+
+    def _check_sell_opposite(self, now: float):
+        """
+        NEW: If both sides filled and winner is >= SELL_OPPOSITE_THRESHOLD,
+        sell the losing side early to free up capital faster.
+
+        Example: YES@0.45 + NO@0.45 = $0.90
+        If YES hits 0.86, NO is worth ~0.14.
+        Selling NO now at ~0.14 gives us $0.14 back immediately.
+        Total: $0.86 (YES payout × 0.98) + $0.14 (NO sold) = ~$0.98
+        vs waiting for expiry: $1.00 × 0.98 = $0.98
+        Nearly the same, but capital is free sooner.
+        """
+        if not self.state.both_filled or self.state.opposite_sold:
+            return
+
+        yes_price = self._fetch_midpoint(self.state.yes_token_id)
+        no_price = self._fetch_midpoint(self.state.no_token_id)
+
+        loser_side = ""
+        loser_token = ""
+
+        if yes_price >= SELL_OPPOSITE_THRESHOLD:
+            loser_side = "NO"
+            loser_token = self.state.no_token_id
+        elif no_price >= SELL_OPPOSITE_THRESHOLD:
+            loser_side = "YES"
+            loser_token = self.state.yes_token_id
+
+        if not loser_side:
+            return
+
+        loser_price = self._fetch_midpoint(loser_token)
+        if loser_price < 0.03:
+            # Not worth selling, too close to zero — just wait for expiry
+            return
+
+        self.state.opposite_sold = True
+        self.stats.total_opposite_sells += 1
+        slug_s = _slug_short(self.state.next_market_slug)
+
+        if self.dry_run:
+            print(f"\n  [SELL-OPP] Would sell {loser_side} @ ~{loser_price:.3f} "
+                  f"(winner @ {SELL_OPPOSITE_THRESHOLD}+)")
+        else:
+            self._sell_aggressive(loser_token, self.shares, loser_side)
+
+        msg = (f"🔄 SELL-OPPOSITE: sold {loser_side} @ ~{loser_price:.3f} | "
+               f"winner >= {SELL_OPPOSITE_THRESHOLD} | {slug_s}")
+        print(f"\n  [SELL-OPP] {msg}")
+        send_telegram(msg)
+
+    # ── Selling ───────────────────────────────────────────────────────────────
+
+    def _sell_aggressive(
+        self, token_id: str, shares: float, side_label: str
+    ) -> bool:
+        """
+        Sell at best_bid - discount for guaranteed fill.
+        Falls back to midpoint - discount if book is empty.
+        """
+        if self.dry_run:
+            print(f"\n  [DRY] Would sell {side_label} x{shares}sh aggressively")
+            return True
+
+        # Try best bid first (actual liquidity), fall back to midpoint
+        sell_price = self._fetch_best_bid(token_id)
+        if sell_price <= 0.02:
+            sell_price = self._fetch_midpoint(token_id)
+
+        if sell_price <= 0.02:
+            sell_price = 0.05  # absolute floor
+
+        # Discount for guaranteed fill
+        sell_price = max(0.01, round(sell_price - SELL_PRICE_DISCOUNT, 2))
+
+        order_id, err = self._submit_order(
+            token_id, sell_price, shares, SELL, side_label
         )
 
+        if not order_id:
+            print(f"\n  [!] Aggressive sell failed ({side_label}): {err}")
+            send_telegram(f"⚠️ Sell failed for {side_label}: {err}")
+            return False
 
-# ── Entry point ──────────────────────────────────────────────────────────────
+        return True
+
+    # ── Auto-redemption ───────────────────────────────────────────────────────
+
+    def _attempt_redemption(self):
+        """
+        Try to redeem winning tokens after window closes.
+        This converts winning YES/NO tokens back to USDC.
+        """
+        if self.state.redemption_attempted or not self.state.condition_id:
+            return
+
+        self.state.redemption_attempted = True
+
+        if self.dry_run:
+            print(f"\n  [DRY] Would attempt redemption for "
+                  f"condition {self.state.condition_id[:16]}...")
+            return
+
+        # NOTE: py_clob_client may not expose redeem directly.
+        # This attempts the CLOB API endpoint; if it doesn't exist
+        # on your version of the client, tokens stay until manual claim.
+        try:
+            # Method 1: direct CLOB API call
+            resp = self.http.post(
+                f"{CLOB_HOST}/redeem",
+                json={"conditionId": self.state.condition_id},
+                headers=self._get_auth_headers(),
+                timeout=15.0,
+            )
+            if resp.status_code == 200:
+                print(f"\n  [REDEEM] ✅ Success for {self.state.condition_id[:16]}...")
+                send_telegram(f"✅ Auto-redeemed: {_slug_short(self.state.next_market_slug)}")
+            else:
+                print(f"\n  [REDEEM] API returned {resp.status_code} — "
+                      f"may need manual claim")
+        except Exception as e:
+            print(f"\n  [REDEEM] Failed (manual claim needed): {e}")
+
+    def _get_auth_headers(self) -> dict:
+        """Get auth headers from CLOB client if available."""
+        try:
+            creds = self.clob.get_api_creds()
+            if creds:
+                return {
+                    "POLY_API_KEY": creds.get("apiKey", ""),
+                    "POLY_API_SECRET": creds.get("secret", ""),
+                    "POLY_PASSPHRASE": creds.get("passphrase", ""),
+                }
+        except Exception:
+            pass
+        return {}
+
+    # ── Cancel orders ─────────────────────────────────────────────────────────
+
+    def _cancel_all_open_orders(self):
+        if self.dry_run:
+            self.state.yes_order_id = None
+            self.state.no_order_id = None
+            return
+        try:
+            self.clob.cancel_all()
+        except Exception as e:
+            print(f"\n[!] cancel_all failed: {e}")
+
+    # ── Window summary ────────────────────────────────────────────────────────
+
+    def _send_window_summary(self):
+        s = self.state
+        slug_s = _slug_short(s.next_market_slug) if s.next_market_slug else "?"
+
+        if s.danger_sold:
+            side = "YES" if s.yes_filled else "NO"
+            price = s.yes_fill_price if s.yes_filled else s.no_fill_price
+            result_line = (f"🚨 DANGER EXIT: {side} sold @ market "
+                          f"(was filled @ {price})")
+            self.stats.total_incomplete += 1
+        elif s.both_filled:
+            profit = round(s.edge * self.shares, 2)
+            pct = round((1.0 - s.pair_cost) * 100, 1)
+            opp_tag = " [opp sold]" if s.opposite_sold else ""
+            result_line = (
+                f"✅ PAIR: YES@{s.yes_fill_price} + NO@{s.no_fill_price}"
+                f" = ${s.pair_cost:.2f} -> +${profit:.2f} ({pct}% edge)"
+                f"{opp_tag}"
+            )
+        elif s.yes_filled:
+            result_line = (f"⚠️ INCOMPLETE: only YES filled @ "
+                          f"{s.yes_fill_price} — DIRECTIONAL BET")
+            self.stats.total_incomplete += 1
+        elif s.no_filled:
+            result_line = (f"⚠️ INCOMPLETE: only NO filled @ "
+                          f"{s.no_fill_price} — DIRECTIONAL BET")
+            self.stats.total_incomplete += 1
+        elif s.orders_placed:
+            result_line = "😴 NO FILLS: orders placed but neither filled"
+            self.stats.total_no_fills += 1
+        else:
+            result_line = "⏭️ SKIP: signal check failed"
+            self.stats.total_skipped += 1
+
+        bal_str = self._balance_str()
+        bal_line = f"💰 Balance: {bal_str}"
+
+        st = self.stats
+        pair_rate = (
+            (st.total_pairs / st.window_count * 100)
+            if st.window_count > 0 else 0.0
+        )
+        stats_line = (
+            f"📊 pairs: {st.total_pairs}, incomplete: {st.total_incomplete},"
+            f" skipped: {st.total_skipped}, empty: {st.total_no_fills},"
+            f" danger: {st.total_danger_exits}, opp_sells: {st.total_opposite_sells}"
+            f" / total: {st.window_count} windows"
+            f" | {pair_rate:.1f}% pair rate | profit: ${st.total_profit:.2f}"
+        )
+
+        console_msg = (
+            f"\n\n[SUMMARY] {slug_s}\n"
+            f"{result_line}\n"
+            f"{bal_line}\n"
+            f"{stats_line}"
+        )
+        print(console_msg)
+
+        # Telegram: incomplete always; periodic stats
+        if not s.both_filled and (s.yes_filled or s.no_filled):
+            side = "YES" if s.yes_filled else "NO"
+            price = s.yes_fill_price if s.yes_filled else s.no_fill_price
+            send_telegram(
+                f"⚠️ INCOMPLETE: {side} only @ {price} — DIRECTIONAL BET\n"
+                f"Window: {slug_s}"
+            )
+
+        if st.window_count % 5 == 0 and st.window_count > 0:
+            send_telegram(f"{bal_line}\n{stats_line}")
+
+    # ── Main loop ─────────────────────────────────────────────────────────────
+
+    def run(self):
+        mode_label = "LIVE" if not self.dry_run else "DRY RUN"
+        bal_str = self._balance_str()
+
+        print("=" * 60)
+        print(f"  🤖 Gabagool Pre-Order v2 — {mode_label}")
+        print(f"  Price limit     : {self.price_limit}")
+        print(f"  Shares/order    : {self.shares}")
+        print(f"  Pre-order       : {PLACE_ORDER_BEFORE_SECS}s before window")
+        print(f"  Danger price    : {DANGER_PRICE}")
+        print(f"  Sell-opposite   : >= {SELL_OPPOSITE_THRESHOLD}")
+        print(f"  Signal range    : [{STABLE_MIN}, {STABLE_MAX}]")
+        print(f"  Balance         : {bal_str}")
+        print("  Ctrl+C to stop")
+        print("=" * 60)
+
+        send_telegram(
+            f"🤖 Gabagool v2 | {mode_label} | Balance: {bal_str}\n"
+            f"Price: {self.price_limit} | Shares: {self.shares} | "
+            f"Danger: {DANGER_PRICE} | SellOpp: {SELL_OPPOSITE_THRESHOLD}"
+        )
+
+        self.running = True
+        last_fill_check = 0.0
+
+        while self.running:
+            now = time.time()
+            next_ts = self._get_next_window_ts()
+            secs_to_next = next_ts - now
+
+            # ── Phase 1: Pre-order (2 min before next window) ─────
+            if not self.state.orders_placed and not self.state.signal_attempted:
+                if secs_to_next <= PLACE_ORDER_BEFORE_SECS:
+                    self.state.signal_attempted = True
+                    good, yes_mid, no_mid = self._check_signal()
+
+                    if good:
+                        print(
+                            f"\n  [SIGNAL] GOOD: YES={yes_mid:.3f} "
+                            f"NO={no_mid:.3f} | placing orders "
+                            f"{secs_to_next:.0f}s before window"
+                        )
+                        self._place_orders_for_ts(next_ts, "PRE-ORDER")
+                    else:
+                        reason = self._format_skip_reason(yes_mid, no_mid)
+                        print(f"\n  [SKIP] Bad signal: {reason}")
+                        self.state.signal_checked = True
+                        self.state.window_ts = next_ts
+
+            # ── Phase 1b: Mid-market orders (if no active orders) ─
+            if (
+                not self.state.orders_placed
+                and not self.state.signal_checked
+                and not self.state.signal_attempted
+                and secs_to_next > PLACE_ORDER_BEFORE_SECS
+            ):
+                current_ts = self._get_current_window_ts()
+                current_window_end = current_ts + WINDOW_SECS
+                time_remaining = current_window_end - now
+
+                if time_remaining > DANGER_TIME_SECS + PLACE_ORDER_BEFORE_SECS:
+                    good, yes_mid, no_mid = self._check_signal()
+                    self.state.signal_attempted = True
+
+                    if good:
+                        print(
+                            f"\n  [MID-MARKET] GOOD signal: "
+                            f"YES={yes_mid:.3f} NO={no_mid:.3f} | "
+                            f"placing orders on current window "
+                            f"({time_remaining:.0f}s left)"
+                        )
+                        self._place_orders_for_ts(current_ts, "MID-MARKET")
+                    else:
+                        # Bad signal for mid-market, retry at pre-order
+                        self.state.signal_attempted = False
+                        self._print_waiting(secs_to_next)
+                else:
+                    self._print_waiting(secs_to_next)
+
+            # ── Phase 2: Monitoring fills + risk management ───────
+            if self.state.orders_placed:
+                if now - last_fill_check >= FILL_CHECK_INTERVAL:
+                    self._check_fills()
+                    last_fill_check = now
+
+                # Risk management
+                self._check_danger(now)
+                self._check_sell_opposite(now)
+
+                # Status line
+                self._print_status(secs_to_next)
+
+            # ── Window expiry: reset ──────────────────────────────
+            if self.state.window_ts > 0 and now >= self.state.window_ts + WINDOW_SECS:
+                self._cancel_all_open_orders()
+                self._attempt_redemption()
+                self.stats.window_count += 1
+                self._send_window_summary()
+                slug = _slug_short(self.state.next_market_slug)
+                print(f"\n[*] Window {slug} ended.")
+                self.state = WindowState()
+                last_fill_check = 0.0
+                continue
+
+            # Reset if signal was bad and window started
+            if (
+                self.state.signal_checked
+                and not self.state.orders_placed
+                and self.state.window_ts > 0
+                and now >= self.state.window_ts
+            ):
+                self.stats.window_count += 1
+                self._send_window_summary()
+                self.state = WindowState()
+                last_fill_check = 0.0
+                continue
+
+            try:
+                time.sleep(CHECK_INTERVAL)
+            except KeyboardInterrupt:
+                self.running = False
+                break
+
+        self._cancel_all_open_orders()
+        self.logger.close()
+        print("\n\n⛔ Stopped")
+
+    # ── Display helpers ───────────────────────────────────────────────────────
+
+    def _print_waiting(self, secs_to_next: float):
+        mode = "[DRY]" if self.dry_run else "[LIVE]"
+        pre_in = secs_to_next - PLACE_ORDER_BEFORE_SECS
+        print(
+            f"  [WAITING] secs_to_next={secs_to_next:.0f}"
+            f" | pre-order in {pre_in:.0f}s {mode}",
+            end="\r",
+        )
+
+    def _print_status(self, secs_to_next: float):
+        slug_s = _slug_short(self.state.next_market_slug)
+        mode_tag = "[DRY]" if self.dry_run else "[LIVE]"
+
+        yes_s = (
+            f"FILLED@{self.state.yes_fill_price}"
+            if self.state.yes_filled else "open"
+        )
+        no_s = (
+            f"FILLED@{self.state.no_fill_price}"
+            if self.state.no_filled else "open"
+        )
+        pair = " PAIR!" if self.state.both_filled else ""
+        opp = " [opp sold]" if self.state.opposite_sold else ""
+
+        secs_into = (
+            WINDOW_SECS - secs_to_next
+            if secs_to_next < WINDOW_SECS else 0
+        )
+        print(
+            f"  YES@{self.price_limit}({yes_s}) "
+            f"NO@{self.price_limit}({no_s})"
+            f"{pair}{opp} | {slug_s} {secs_into:.0f}s {mode_tag}",
+            end="\r",
+        )
+
+    @staticmethod
+    def _format_skip_reason(yes_mid: float, no_mid: float) -> str:
+        if yes_mid >= CLEAR_THRESHOLD or no_mid >= CLEAR_THRESHOLD:
+            return f"market decided (YES={yes_mid:.3f} NO={no_mid:.3f})"
+        if yes_mid <= 0.01 or no_mid <= 0.01:
+            return f"bad price data (YES={yes_mid:.3f} NO={no_mid:.3f})"
+        return f"outside range (YES={yes_mid:.3f} NO={no_mid:.3f})"
+
+
+# ── Entry point ───────────────────────────────────────────────────────────────
 
 def main():
-    parser = argparse.ArgumentParser(description="Tail Hunter — real-time paper trading")
-    parser.add_argument("--balance", type=float, default=DEFAULT_BALANCE)
-    parser.add_argument("--bet-size", type=float, default=DEFAULT_BET_SIZE)
-    parser.add_argument("--threshold", type=float, default=DEFAULT_THRESHOLD)
+    parser = argparse.ArgumentParser(
+        description="Gabagool BTC 15-min pre-order trader v2"
+    )
+    parser.add_argument(
+        "--live", action="store_true",
+        help="Enable LIVE trading (real money). Default is DRY RUN.",
+    )
+    parser.add_argument(
+        "--shares", type=int, default=SHARES,
+        help=f"Shares per order (default: {SHARES})",
+    )
+    parser.add_argument(
+        "--price-limit", type=float, default=PRICE_LIMIT,
+        help=f"Limit buy price for both sides (default: {PRICE_LIMIT})",
+    )
     args = parser.parse_args()
 
-    bot = TailHunterBot(
-        balance=args.balance,
-        bet_size=args.bet_size,
-        threshold=args.threshold,
+    dry_run = not args.live
+
+    if not dry_run:
+        print()
+        print("!" * 60)
+        print("  ⚠️  LIVE MODE — REAL MONEY WILL BE SPENT ⚠️")
+        print(f"  {args.shares}sh/order @ ${args.price_limit}/side")
+        print("  Press Ctrl+C NOW to abort, or wait 5 seconds...")
+        print("!" * 60)
+        print()
+        try:
+            time.sleep(5)
+        except KeyboardInterrupt:
+            print("⛔ Aborted before live trading started.")
+            return
+
+    trader = GabagoolTrader(
+        dry_run=dry_run,
+        shares=args.shares,
+        price_limit=args.price_limit,
     )
-    bot.run()
+    try:
+        trader.run()
+    except KeyboardInterrupt:
+        trader._cancel_all_open_orders()
+        trader.logger.close()
+        print("\n⛔ Stopped")
 
 
 if __name__ == "__main__":
