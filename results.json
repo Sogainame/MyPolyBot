@@ -1,0 +1,2089 @@
+[
+  {
+    "wallet": "0x03524d9d00cffe5004d1d270edfea7b3109e3292",
+    "username": "IAMAAIROBOT",
+    "score": 75.0,
+    "pnl": 48348.508928714335,
+    "volume": 283730.795549,
+    "pnl_margin": 0.17040275390326676,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.3352348448304767,
+    "categories": [
+      "crypto",
+      "other"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@IAMAAIROBOT"
+  },
+  {
+    "wallet": "0x2a2c53bd278c04da9962fcf96490e17f3dfb9bc1",
+    "username": "0x2a2C53bD278c04DA9962Fcf96490E17F3DfB9Bc1-1772479215461",
+    "score": 70.0,
+    "pnl": 88109.17291688999,
+    "volume": 358460.61,
+    "pnl_margin": 0.24579875852158484,
+    "win_rate": 0.0,
+    "positions_count": 192,
+    "avg_entry_price": 0.37160000461654114,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@0x2a2C53bD278c04DA9962Fcf96490E17F3DfB9Bc1-1772479215461"
+  },
+  {
+    "wallet": "0x55be7aa03ecfbe37aa5460db791205f7ac9ddca3",
+    "username": "coinman2",
+    "score": 70.0,
+    "pnl": 74815.16218212817,
+    "volume": 906794.4021019998,
+    "pnl_margin": 0.08250509929119816,
+    "win_rate": 0.0,
+    "positions_count": 244,
+    "avg_entry_price": 0.37362750877692297,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@coinman2"
+  },
+  {
+    "wallet": "0x0006af12cd4dacc450836a0e1ec6ce47365d8c63",
+    "username": "stingo43",
+    "score": 65.0,
+    "pnl": 202201.58834480512,
+    "volume": 3668932.6686779996,
+    "pnl_margin": 0.05511182859010137,
+    "win_rate": 0.0,
+    "positions_count": 132,
+    "avg_entry_price": 0.30375805384755106,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@stingo43"
+  },
+  {
+    "wallet": "0x8db25e5540eed5e0f457ef667edc4e21edd4c3a1",
+    "username": "hkuhjiuhoih",
+    "score": 65.0,
+    "pnl": 90798.45544752074,
+    "volume": 538053.86532,
+    "pnl_margin": 0.16875346744980568,
+    "win_rate": 0.0,
+    "positions_count": 62,
+    "avg_entry_price": 0.5986738865384885,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@hkuhjiuhoih"
+  },
+  {
+    "wallet": "0x3afeab8b5763c0ef5b9df5b34b529d5774f12c78",
+    "username": "jianing888",
+    "score": 65.0,
+    "pnl": 88680.32039557342,
+    "volume": 762752.447375,
+    "pnl_margin": 0.11626356716489772,
+    "win_rate": 0.0,
+    "positions_count": 96,
+    "avg_entry_price": 0.5074863506849308,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@jianing888"
+  },
+  {
+    "wallet": "0x11d6900fb28c4b4cfea815579e612125a3549053",
+    "username": "fdgfdcg4545",
+    "score": 65.0,
+    "pnl": 83188.32925507278,
+    "volume": 534879.634826,
+    "pnl_margin": 0.15552719497749157,
+    "win_rate": 0.0,
+    "positions_count": 74,
+    "avg_entry_price": 0.6915587474570148,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@fdgfdcg4545"
+  },
+  {
+    "wallet": "0x4e3c68cd55d2d83a8ac69d32d90c1f96222407bc",
+    "username": "billieadvxo",
+    "score": 65.0,
+    "pnl": 71628.2375,
+    "volume": 143256.0,
+    "pnl_margin": 0.5000016578712235,
+    "win_rate": 0.0,
+    "positions_count": 50,
+    "avg_entry_price": 0.440841564260399,
+    "categories": [
+      "crypto",
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@billieadvxo"
+  },
+  {
+    "wallet": "0x388537259dc9e693c1c9b96fdf07a63f6b7aca77",
+    "username": "easypredict",
+    "score": 65.0,
+    "pnl": 62442.42206492298,
+    "volume": 1302206.0446390002,
+    "pnl_margin": 0.04795126110955304,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.3591550103207812,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@easypredict"
+  },
+  {
+    "wallet": "0x5fc17eb1028bb74887a6f3da4899737a861070bc",
+    "username": "YGHUI",
+    "score": 65.0,
+    "pnl": 61877.99605801109,
+    "volume": 538049.624709,
+    "pnl_margin": 0.11500425465676578,
+    "win_rate": 0.0,
+    "positions_count": 67,
+    "avg_entry_price": 0.5975414710633341,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@YGHUI"
+  },
+  {
+    "wallet": "0xddaa07da69a0f71f7d0d7a654a430fa2f73c8766",
+    "username": "googoogaga23",
+    "score": 65.0,
+    "pnl": 58945.93892093307,
+    "volume": 1758614.9088340001,
+    "pnl_margin": 0.03351838917367959,
+    "win_rate": 0.0,
+    "positions_count": 230,
+    "avg_entry_price": 0.4213394851438117,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@googoogaga23"
+  },
+  {
+    "wallet": "0x1461cc6e1a05e20710c416307db62c28f1d122d8",
+    "username": "0x1461cC6e",
+    "score": 65.0,
+    "pnl": 48157.68098425178,
+    "volume": 854150.4971900001,
+    "pnl_margin": 0.056380791374215436,
+    "win_rate": 0.0,
+    "positions_count": 141,
+    "avg_entry_price": 0.4088104098893169,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@0x1461cC6e"
+  },
+  {
+    "wallet": "0x252d7bae5ec87553dcafb23e275c202ac0d3c456",
+    "username": "getbipped",
+    "score": 65.0,
+    "pnl": 46097.29662187974,
+    "volume": 1107018.6503070001,
+    "pnl_margin": 0.04164093948109723,
+    "win_rate": 0.0,
+    "positions_count": 242,
+    "avg_entry_price": 0.4056900106196246,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@getbipped"
+  },
+  {
+    "wallet": "0xa3d043b2da34f58045c6485d3f89b798b2b0ec04",
+    "username": "0xa3d043b2da34f58045c6485d3f89b798b2b0ec04",
+    "score": 65.0,
+    "pnl": 42729.76739010379,
+    "volume": 1254387.590862,
+    "pnl_margin": 0.034064245932742696,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.44567406058833325,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@0xa3d043b2da34f58045c6485d3f89b798b2b0ec04"
+  },
+  {
+    "wallet": "0x5fe14b52584c83c18496914db0b30a28d4510981",
+    "username": "Bitara",
+    "score": 60.0,
+    "pnl": 132887.47009245277,
+    "volume": 2348990.9223199994,
+    "pnl_margin": 0.056572151399037936,
+    "win_rate": 0.0,
+    "positions_count": 50,
+    "avg_entry_price": 0.537730522227799,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@Bitara"
+  },
+  {
+    "wallet": "0x48ac725cae99c545c2676b4bf03493f039b45e03",
+    "username": "kkflh84ljfl4ljl499jjsssf4f",
+    "score": 60.0,
+    "pnl": 99973.15172067616,
+    "volume": 1487004.1527029998,
+    "pnl_margin": 0.06723125254152795,
+    "win_rate": 0.0,
+    "positions_count": 78,
+    "avg_entry_price": 0.3316875779489464,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@kkflh84ljfl4ljl499jjsssf4f"
+  },
+  {
+    "wallet": "0x773a2f6c325621852fdfa5c83f91071e78602e81",
+    "username": "BGTtDFJ",
+    "score": 60.0,
+    "pnl": 83374.24155517749,
+    "volume": 961141.3981519998,
+    "pnl_margin": 0.08674503222468861,
+    "win_rate": 0.0,
+    "positions_count": 56,
+    "avg_entry_price": 0.2683324871166544,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@BGTtDFJ"
+  },
+  {
+    "wallet": "0x30af6a4f675f3b90adace43141ed6e6de37b1879",
+    "username": "xok52-3-4-5",
+    "score": 60.0,
+    "pnl": 60319.617963652396,
+    "volume": 917216.2565430001,
+    "pnl_margin": 0.06576379074548658,
+    "win_rate": 0.0,
+    "positions_count": 85,
+    "avg_entry_price": 0.3173915374262042,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@xok52-3-4-5"
+  },
+  {
+    "wallet": "0x5ee8cc00eb174041df6c854b4ba7a8d822c2b5c0",
+    "username": "rigober",
+    "score": 60.0,
+    "pnl": 58057.999999999985,
+    "volume": 116116.0,
+    "pnl_margin": 0.4999999999999999,
+    "win_rate": 0.0,
+    "positions_count": 50,
+    "avg_entry_price": 0.7855262785876629,
+    "categories": [
+      "crypto",
+      "other",
+      "politics",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@rigober"
+  },
+  {
+    "wallet": "0x781a48229e2c08e20d1eaad90ef73710988c96e6",
+    "username": "100USDollars",
+    "score": 60.0,
+    "pnl": 52147.39931248015,
+    "volume": 994368.0419450001,
+    "pnl_margin": 0.0524427547072802,
+    "win_rate": 0.0,
+    "positions_count": 124,
+    "avg_entry_price": 0.21309029968152893,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@100USDollars"
+  },
+  {
+    "wallet": "0xabb651bdd3d2fb52c8f310fe2db175d11574db26",
+    "username": "gerzz",
+    "score": 60.0,
+    "pnl": 51919.96341926354,
+    "volume": 858883.1190889999,
+    "pnl_margin": 0.06045055755005874,
+    "win_rate": 0.0,
+    "positions_count": 50,
+    "avg_entry_price": 0.4851500489677296,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@gerzz"
+  },
+  {
+    "wallet": "0x5cc5b031c7b8e43dc9cc9b6c4e496fd02815b83a",
+    "username": "0x8dszc153187wmy",
+    "score": 60.0,
+    "pnl": 48691.89264437952,
+    "volume": 905826.0159420001,
+    "pnl_margin": 0.05375413356144681,
+    "win_rate": 0.0,
+    "positions_count": 60,
+    "avg_entry_price": 0.3277944423314771,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@0x8dszc153187wmy"
+  },
+  {
+    "wallet": "0x47b94b46610cefca8c10d82e79215b8fe5341ccd",
+    "username": "0x47b94B46610CEfcA8C10d82e79215B8FE5341ccd-1773178634170",
+    "score": 60.0,
+    "pnl": 43786.300362,
+    "volume": 364526.964063,
+    "pnl_margin": 0.12011813851562586,
+    "win_rate": 0.0,
+    "positions_count": 50,
+    "avg_entry_price": 0.20768982240633316,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@0x47b94B46610CEfcA8C10d82e79215B8FE5341ccd-1773178634170"
+  },
+  {
+    "wallet": "0xe9c6312464b52aa3eff13d822b003282075995c9",
+    "username": "kingofcoinflips",
+    "score": 55.0,
+    "pnl": 105862.60073393665,
+    "volume": 1920958.4364389998,
+    "pnl_margin": 0.055109261463345736,
+    "win_rate": 0.0,
+    "positions_count": 211,
+    "avg_entry_price": 0.148280007875206,
+    "categories": [
+      "crypto",
+      "other"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@kingofcoinflips"
+  },
+  {
+    "wallet": "0x61bcad5ea4e55e6995b775a193326297edbf6d0b",
+    "username": "boom888",
+    "score": 55.0,
+    "pnl": 81332.91953697542,
+    "volume": 469438.373137,
+    "pnl_margin": 0.17325579712087016,
+    "win_rate": 0.0,
+    "positions_count": 16,
+    "avg_entry_price": 0.36707352775990637,
+    "categories": [
+      "crypto",
+      "other"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@boom888"
+  },
+  {
+    "wallet": "0xb5ffb8902176cc48926e92ecaa90f8f859ce891b",
+    "username": "ddddddddd666",
+    "score": 55.0,
+    "pnl": 80112.27585694859,
+    "volume": 409543.908545,
+    "pnl_margin": 0.19561339867455502,
+    "win_rate": 0.0,
+    "positions_count": 122,
+    "avg_entry_price": 0.1329141591688785,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@ddddddddd666"
+  },
+  {
+    "wallet": "0x9e8283a004204504e52c67f4f387dfb03ba4a28b",
+    "username": "kaseytreute",
+    "score": 55.0,
+    "pnl": 79057.5,
+    "volume": 158115.0,
+    "pnl_margin": 0.5,
+    "win_rate": 0.0,
+    "positions_count": 7,
+    "avg_entry_price": 0.5,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@kaseytreute"
+  },
+  {
+    "wallet": "0x29bcaf8c6eadb451e33cf0950a7494679f2a5127",
+    "username": "cjfu",
+    "score": 55.0,
+    "pnl": 76370.99999999999,
+    "volume": 152742.0,
+    "pnl_margin": 0.4999999999999999,
+    "win_rate": 0.0,
+    "positions_count": 34,
+    "avg_entry_price": 0.7248095090545936,
+    "categories": [
+      "crypto",
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@cjfu"
+  },
+  {
+    "wallet": "0x583866433d0742ae9dba76e6c34d708861d1dbf1",
+    "username": "dorothyoco",
+    "score": 55.0,
+    "pnl": 75565.0,
+    "volume": 151130.0,
+    "pnl_margin": 0.5,
+    "win_rate": 0.0,
+    "positions_count": 7,
+    "avg_entry_price": 0.5,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@dorothyoco"
+  },
+  {
+    "wallet": "0xfed8ff0b541ce9a66d632aedebe81bdd1b2c4388",
+    "username": "JudgeLance",
+    "score": 55.0,
+    "pnl": 72523.38345606248,
+    "volume": 240368.056849,
+    "pnl_margin": 0.3017180585755698,
+    "win_rate": 0.0,
+    "positions_count": 4,
+    "avg_entry_price": 0.5640390264254943,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@JudgeLance"
+  },
+  {
+    "wallet": "0xd1f6675ce1d649c8eae972695fca44e6aaad4aec",
+    "username": "rfergert",
+    "score": 55.0,
+    "pnl": 68580.25899999998,
+    "volume": 137160.0,
+    "pnl_margin": 0.5000018883056283,
+    "win_rate": 0.0,
+    "positions_count": 32,
+    "avg_entry_price": 0.6871914799116845,
+    "categories": [
+      "crypto",
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@rfergert"
+  },
+  {
+    "wallet": "0x36946572d760b5b1a50cfcd213ba901f1cd4c5ae",
+    "username": "0x36946572D760b5b1A50CfCD213bA901F1cd4c5ae-1772669175169",
+    "score": 55.0,
+    "pnl": 67378.60590153681,
+    "volume": 234187.992836,
+    "pnl_margin": 0.2877116161490035,
+    "win_rate": 0.0,
+    "positions_count": 22,
+    "avg_entry_price": 0.2859229145834493,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@0x36946572D760b5b1A50CfCD213bA901F1cd4c5ae-1772669175169"
+  },
+  {
+    "wallet": "0x018632336f97d72891d0b7dffc4f39b49f71fde0",
+    "username": "mideea",
+    "score": 55.0,
+    "pnl": 64082.763751191385,
+    "volume": 335842.93745100015,
+    "pnl_margin": 0.19081170572640413,
+    "win_rate": 0.0,
+    "positions_count": 25,
+    "avg_entry_price": 0.5246847079923925,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@mideea"
+  },
+  {
+    "wallet": "0x69af2c46bccd6ce5d8e7dd6381fb8daa8a853210",
+    "username": "trevolkma",
+    "score": 55.0,
+    "pnl": 59431.000000000015,
+    "volume": 118862.0,
+    "pnl_margin": 0.5000000000000001,
+    "win_rate": 0.0,
+    "positions_count": 28,
+    "avg_entry_price": 0.6884999821220894,
+    "categories": [
+      "crypto",
+      "other",
+      "politics",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@trevolkma"
+  },
+  {
+    "wallet": "0x1cdb4cac9d2428094058b60a0284c2c177dceb5c",
+    "username": "nervem13",
+    "score": 55.0,
+    "pnl": 58306.48327199489,
+    "volume": 144576.37560700002,
+    "pnl_margin": 0.40329191423700234,
+    "win_rate": 0.0,
+    "positions_count": 20,
+    "avg_entry_price": 0.5080786483463435,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@nervem13"
+  },
+  {
+    "wallet": "0xf7a19aad8bd78c2e5e50a0729f6342775a909dce",
+    "username": "4zzzz",
+    "score": 55.0,
+    "pnl": 52991.10276999628,
+    "volume": 512434.541751,
+    "pnl_margin": 0.1034104816371756,
+    "win_rate": 0.0,
+    "positions_count": 25,
+    "avg_entry_price": 0.2796067898381868,
+    "categories": [
+      "crypto",
+      "other"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@4zzzz"
+  },
+  {
+    "wallet": "0x71a70f24538d885d1b45f9cea158a2cdf2e56fcf",
+    "username": "easyclap",
+    "score": 55.0,
+    "pnl": 52646.4168773343,
+    "volume": 1301624.918716,
+    "pnl_margin": 0.04044668792087036,
+    "win_rate": 0.0,
+    "positions_count": 97,
+    "avg_entry_price": 0.36535500979183816,
+    "categories": [
+      "crypto",
+      "other"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@easyclap"
+  },
+  {
+    "wallet": "0xa7011667f22c121c6cea7aab30192307c58c47cd",
+    "username": "BadTattoo",
+    "score": 55.0,
+    "pnl": 51264.199236008586,
+    "volume": 192812.58762999997,
+    "pnl_margin": 0.2658757909228553,
+    "win_rate": 0.0,
+    "positions_count": 10,
+    "avg_entry_price": 0.526281141672229,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@BadTattoo"
+  },
+  {
+    "wallet": "0xb4ff33ac1c696af6395992da15d3f133d9b376dd",
+    "username": "zitaethyerguy",
+    "score": 55.0,
+    "pnl": 45136.00000000001,
+    "volume": 90272.0,
+    "pnl_margin": 0.5000000000000001,
+    "win_rate": 0.0,
+    "positions_count": 31,
+    "avg_entry_price": 0.5410908351019054,
+    "categories": [
+      "crypto",
+      "other",
+      "politics",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@zitaethyerguy"
+  },
+  {
+    "wallet": "0xbee7dfa01fd9630b006f6f00565e80db370da3f8",
+    "username": "bitcoin392823",
+    "score": 55.0,
+    "pnl": 42974.38400057033,
+    "volume": 541577.38773,
+    "pnl_margin": 0.07935040305263805,
+    "win_rate": 0.0,
+    "positions_count": 76,
+    "avg_entry_price": 0.18630591478951428,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@bitcoin392823"
+  },
+  {
+    "wallet": "0x8aee828d9e019ed18f01b0013163f62795f2dbc2",
+    "username": "bryanastammmiu",
+    "score": 55.0,
+    "pnl": 40561.99999999999,
+    "volume": 81124.0,
+    "pnl_margin": 0.4999999999999999,
+    "win_rate": 0.0,
+    "positions_count": 36,
+    "avg_entry_price": 0.7082325071373029,
+    "categories": [
+      "crypto",
+      "other",
+      "politics",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@bryanastammmiu"
+  },
+  {
+    "wallet": "0xde17f7144fbd0eddb2679132c10ff5e74b120988",
+    "username": "0xdE17f7144fbD0eddb2679132C10ff5e74B120988-1772205225932",
+    "score": 50.0,
+    "pnl": 438708.9499895632,
+    "volume": 28400430.587127,
+    "pnl_margin": 0.015447264035088814,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.7450750424829563,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@0xdE17f7144fbD0eddb2679132C10ff5e74B120988-1772205225932"
+  },
+  {
+    "wallet": "0x2eb5714ff6f20f5f9f7662c556dbef5e1c9bf4d4",
+    "username": "0x2Eb5714FF6f20f5F9f7662c556DBEF5e1c9bf4D",
+    "score": 50.0,
+    "pnl": 199353.1739377359,
+    "volume": 34116203.215858996,
+    "pnl_margin": 0.005843357558764514,
+    "win_rate": 0.0,
+    "positions_count": 206,
+    "avg_entry_price": 0.47646294051818017,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@0x2Eb5714FF6f20f5F9f7662c556DBEF5e1c9bf4D"
+  },
+  {
+    "wallet": "0x3e9d296b8f8f670cd859350b3c0a00251dc71f47",
+    "username": "hgjghjh85",
+    "score": 50.0,
+    "pnl": 161184.10139742726,
+    "volume": 891780.281215,
+    "pnl_margin": 0.18074418642428725,
+    "win_rate": 0.0,
+    "positions_count": 74,
+    "avg_entry_price": 0.0175,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@hgjghjh85"
+  },
+  {
+    "wallet": "0x70ec235a31eb35f243e2618d6ea3b5b8962bbb5d",
+    "username": "vague-sourdough",
+    "score": 50.0,
+    "pnl": 153499.6608696985,
+    "volume": 15272821.067410998,
+    "pnl_margin": 0.010050511309743203,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.575346343117573,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@vague-sourdough"
+  },
+  {
+    "wallet": "0x732f189193d7a8c8bc8d8eb91f501a22736af081",
+    "username": "0x732F1",
+    "score": 50.0,
+    "pnl": 140654.2248589773,
+    "volume": 22074541.354234,
+    "pnl_margin": 0.006371784699934396,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.4841409060808741,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@0x732F1"
+  },
+  {
+    "wallet": "0x45bc74efa620b45c02308acaecdff1f7c06f978b",
+    "username": "0xbbc5zcZ96bne91qq99724dbdc6",
+    "score": 50.0,
+    "pnl": 115430.918541072,
+    "volume": 5108554.064236,
+    "pnl_margin": 0.0225956145495614,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.521662499369591,
+    "categories": [
+      "crypto",
+      "other",
+      "politics"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@0xbbc5zcZ96bne91qq99724dbdc6"
+  },
+  {
+    "wallet": "0xa82afc3751a2e58ec985989eb7d51b3f0f179055",
+    "username": "0xa82afc3751a2E58Ec985989eb7d51B3F0F179055-1772382184810",
+    "score": 50.0,
+    "pnl": 86405.42995437353,
+    "volume": 2968820.572456,
+    "pnl_margin": 0.029104295071255646,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.5728317774142792,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@0xa82afc3751a2E58Ec985989eb7d51B3F0F179055-1772382184810"
+  },
+  {
+    "wallet": "0x571c285a83eba5322b5f916ba681669dc368a61f",
+    "username": "dustedfloor",
+    "score": 50.0,
+    "pnl": 81288.2545825312,
+    "volume": 5269094.6978629995,
+    "pnl_margin": 0.015427366415619648,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.5818678188997858,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@dustedfloor"
+  },
+  {
+    "wallet": "0xcc500cbcc8b7cf5bd21975ebbea34f21b5644c82",
+    "username": "justdance",
+    "score": 50.0,
+    "pnl": 78599.74646745832,
+    "volume": 3174656.7792709996,
+    "pnl_margin": 0.02475850207829625,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.34342626338993765,
+    "categories": [
+      "crypto",
+      "other",
+      "politics",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@justdance"
+  },
+  {
+    "wallet": "0xa1303d0d0403549c93c9cdc2866def3b916ded0d",
+    "username": "xr9-PLM42",
+    "score": 50.0,
+    "pnl": 77486.48048654788,
+    "volume": 21922452.434607007,
+    "pnl_margin": 0.003534571723564419,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.4583128688198663,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@xr9-PLM42"
+  },
+  {
+    "wallet": "0x511e5c7b146d861a66b29f8ba891e143306d1a69",
+    "username": "luochen1",
+    "score": 50.0,
+    "pnl": 77291.96039622319,
+    "volume": 594285.6771969999,
+    "pnl_margin": 0.1300585953219964,
+    "win_rate": 0.0,
+    "positions_count": 41,
+    "avg_entry_price": 0.18330814642397386,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@luochen1"
+  },
+  {
+    "wallet": "0xf6963d4cdbb6f26d753bda303e9513132afb1b7d",
+    "username": "rename",
+    "score": 50.0,
+    "pnl": 75630.32212363265,
+    "volume": 7148350.480234,
+    "pnl_margin": 0.010580108282709286,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.5765238511485095,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@rename"
+  },
+  {
+    "wallet": "0x3a66b3e5bd108fdf53ed781f6a24ad287a720746",
+    "username": "BGTTDFJDFJ",
+    "score": 50.0,
+    "pnl": 62482.77155326102,
+    "volume": 547226.0267119999,
+    "pnl_margin": 0.11418092068589628,
+    "win_rate": 0.0,
+    "positions_count": 50,
+    "avg_entry_price": 0.08875720129809887,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@BGTTDFJDFJ"
+  },
+  {
+    "wallet": "0xcc7b6376adee4c5720512cf1797c12d708468606",
+    "username": "sheridangerlach",
+    "score": 50.0,
+    "pnl": 58158.000000000015,
+    "volume": 116316.0,
+    "pnl_margin": 0.5000000000000001,
+    "win_rate": 0.0,
+    "positions_count": 36,
+    "avg_entry_price": 0.7816799874367062,
+    "categories": [
+      "crypto",
+      "other",
+      "politics",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@sheridangerlach"
+  },
+  {
+    "wallet": "0x5bde889dc26b097b5eaa2f1f027e01712ebccbb7",
+    "username": "delta99core",
+    "score": 50.0,
+    "pnl": 58011.209482291015,
+    "volume": 15378061.293553004,
+    "pnl_margin": 0.003772335691405473,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.4607500412264618,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@delta99core"
+  },
+  {
+    "wallet": "0xee67f4f549180f564dd5910b1024b8c6729cef38",
+    "username": "keasiyo",
+    "score": 50.0,
+    "pnl": 56594.408011984066,
+    "volume": 640649.3295130001,
+    "pnl_margin": 0.08833913563135268,
+    "win_rate": 0.0,
+    "positions_count": 131,
+    "avg_entry_price": 0.09959999915603576,
+    "categories": [
+      "other",
+      "politics",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@keasiyo"
+  },
+  {
+    "wallet": "0xd111ced402bac802f74606deca83bbf6a1eaaf32",
+    "username": "qT9vL2",
+    "score": 50.0,
+    "pnl": 54536.362701435224,
+    "volume": 15041100.455261003,
+    "pnl_margin": 0.0036258226493234916,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.5066028802884771,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@qT9vL2"
+  },
+  {
+    "wallet": "0x08ea825d0f6189ce27c3d1168511e30072fd9984",
+    "username": "NebulaDrive",
+    "score": 50.0,
+    "pnl": 52755.44918388968,
+    "volume": 6540665.535862999,
+    "pnl_margin": 0.008065761640711832,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.5100898016735019,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@NebulaDrive"
+  },
+  {
+    "wallet": "0x52f8784a81d967a3afb74d2e1608503ff5e261b9",
+    "username": "VortexLane",
+    "score": 50.0,
+    "pnl": 51697.27927372552,
+    "volume": 14299004.954192,
+    "pnl_margin": 0.0036154459306323673,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.48952373450277364,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@VortexLane"
+  },
+  {
+    "wallet": "0x437bfe05a1e169b1443f16e718525a88b6f283b2",
+    "username": "MarbleFox",
+    "score": 50.0,
+    "pnl": 51298.05284067321,
+    "volume": 14892235.810181001,
+    "pnl_margin": 0.0034446172820875934,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.4542500847899168,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@MarbleFox"
+  },
+  {
+    "wallet": "0x5b228f006f70e182531cb3d440359051aa4f0d9e",
+    "username": "sigridbeahanr",
+    "score": 50.0,
+    "pnl": 50056.0,
+    "volume": 100112.0,
+    "pnl_margin": 0.5,
+    "win_rate": 0.0,
+    "positions_count": 41,
+    "avg_entry_price": 0.7986980994436227,
+    "categories": [
+      "crypto",
+      "other",
+      "politics",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@sigridbeahanr"
+  },
+  {
+    "wallet": "0x9da54c66299338b1a5ca2d082d62e2a402948d11",
+    "username": "jakaylacons",
+    "score": 50.0,
+    "pnl": 49778.0,
+    "volume": 99556.0,
+    "pnl_margin": 0.5,
+    "win_rate": 0.0,
+    "positions_count": 34,
+    "avg_entry_price": 0.7981621450103811,
+    "categories": [
+      "crypto",
+      "other",
+      "politics",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@jakaylacons"
+  },
+  {
+    "wallet": "0x5924ca480d8b08cd5f3e5811fa378c4082475af6",
+    "username": "late-to-tomorrow",
+    "score": 50.0,
+    "pnl": 49555.89402050167,
+    "volume": 3077956.082587,
+    "pnl_margin": 0.0161002602671479,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.6253698762237099,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@late-to-tomorrow"
+  },
+  {
+    "wallet": "0x8648027882a7b78238f8aaf2506be73a5aa5bd2f",
+    "username": "88kiloMatrixx",
+    "score": 50.0,
+    "pnl": 48884.22784675556,
+    "volume": 10835410.779289,
+    "pnl_margin": 0.004511525113583489,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.4832000368779004,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@88kiloMatrixx"
+  },
+  {
+    "wallet": "0xb4d2499b6cabd0bb93672bb17c5ae47101759ee1",
+    "username": "stargate5",
+    "score": 50.0,
+    "pnl": 45052.248855026424,
+    "volume": 6869611.540413,
+    "pnl_margin": 0.006558194533998045,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.49810814584324264,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@stargate5"
+  },
+  {
+    "wallet": "0x113d4c0b5a6702ab045ea2cba7c3f71d51fc3ce8",
+    "username": "charles-de-g",
+    "score": 50.0,
+    "pnl": 44371.56599516785,
+    "volume": 7506241.022075,
+    "pnl_margin": 0.005911289800670686,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.5089377119372872,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@charles-de-g"
+  },
+  {
+    "wallet": "0x0d05acd6baaa8ea1fac50ab74a7679ae6f534518",
+    "username": "MtStol",
+    "score": 50.0,
+    "pnl": 40903.29514047052,
+    "volume": 5488566.091689001,
+    "pnl_margin": 0.007452455606284467,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.5156785383899651,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@MtStol"
+  },
+  {
+    "wallet": "0x1f0ebc543b2d411f66947041625c0aa1ce61cf86",
+    "username": "0x1f0ebc543B2d411f66947041625c0Aa1ce61CF86-1772205597930",
+    "score": 45.0,
+    "pnl": 254849.9721421646,
+    "volume": 60417155.93462801,
+    "pnl_margin": 0.004218172275734311,
+    "win_rate": 0.0,
+    "positions_count": 103,
+    "avg_entry_price": 0.2730650027970978,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@0x1f0ebc543B2d411f66947041625c0Aa1ce61CF86-1772205597930"
+  },
+  {
+    "wallet": "0xa45fe11dd1420fca906ceac2c067844379a42429",
+    "username": "guh123",
+    "score": 45.0,
+    "pnl": 169855.225118087,
+    "volume": 38254093.231133014,
+    "pnl_margin": 0.004440184324637204,
+    "win_rate": 0.0,
+    "positions_count": 100,
+    "avg_entry_price": 0.5013687622780505,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@guh123"
+  },
+  {
+    "wallet": "0xa9ae84ee529dbec0c6634b08cd97d3f13f7d74f5",
+    "username": "david43332",
+    "score": 45.0,
+    "pnl": 88656.34313430777,
+    "volume": 926599.093826,
+    "pnl_margin": 0.09567928970040193,
+    "win_rate": 0.0,
+    "positions_count": 53,
+    "avg_entry_price": 0.1189712996678968,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@david43332"
+  },
+  {
+    "wallet": "0x4c68efb47d52cd6cd67ed40c728a3855d4bd0f7c",
+    "username": "wosikunhi",
+    "score": 45.0,
+    "pnl": 60894.7750706264,
+    "volume": 763368.6891369999,
+    "pnl_margin": 0.07977111969246325,
+    "win_rate": 0.0,
+    "positions_count": 55,
+    "avg_entry_price": 0.03568905321701617,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@wosikunhi"
+  },
+  {
+    "wallet": "0x6916cc00aa1c3e75ecf4081df7cae7d2f3592fd4",
+    "username": "x6916Cc00AA1c3e75ECf4081DF7caE7D2f3592fd4",
+    "score": 45.0,
+    "pnl": 54117.71357836842,
+    "volume": 7776441.540594,
+    "pnl_margin": 0.006959187347563428,
+    "win_rate": 0.0,
+    "positions_count": 104,
+    "avg_entry_price": 0.5235442973145471,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@x6916Cc00AA1c3e75ECf4081DF7caE7D2f3592fd4"
+  },
+  {
+    "wallet": "0x8a8f89ebb3717149a27c0c99f379d2c6d4ed5e3f",
+    "username": "aaaaajony",
+    "score": 45.0,
+    "pnl": 52734.08233400002,
+    "volume": 615931.850129,
+    "pnl_margin": 0.08561674854605336,
+    "win_rate": 0.0,
+    "positions_count": 50,
+    "avg_entry_price": 0.0837755442924667,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@aaaaajony"
+  },
+  {
+    "wallet": "0x5593be880a12823f0a6f195217e22bc4787873e1",
+    "username": "S0FT",
+    "score": 45.0,
+    "pnl": 50700.88929277873,
+    "volume": 2481176.547057,
+    "pnl_margin": 0.020434212693537113,
+    "win_rate": 0.0,
+    "positions_count": 100,
+    "avg_entry_price": 0.3336700077440186,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@S0FT"
+  },
+  {
+    "wallet": "0x030c04d83a7c2c31aa0ea2356bf0a00f9a79537b",
+    "username": "0x030C04d83a7C2c31aA0Ea2356BF0a00f9a79537b-1771944642491",
+    "score": 45.0,
+    "pnl": 48089.851263615164,
+    "volume": 3253061.62719,
+    "pnl_margin": 0.014782951193321,
+    "win_rate": 0.0,
+    "positions_count": 143,
+    "avg_entry_price": 0.4537000133278079,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@0x030C04d83a7C2c31aA0Ea2356BF0a00f9a79537b-1771944642491"
+  },
+  {
+    "wallet": "0x576b0696fd5a9225d66fd9500fd98f5be10b0cab",
+    "username": "Hcrystallash",
+    "score": 45.0,
+    "pnl": 46047.86679809408,
+    "volume": 2905537.857214,
+    "pnl_margin": 0.015848310729720615,
+    "win_rate": 0.0,
+    "positions_count": 184,
+    "avg_entry_price": 0.5203311635804075,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@Hcrystallash"
+  },
+  {
+    "wallet": "0x63ce342161250d705dc0b16df89036c8e5f9ba9a",
+    "username": "0x8dxd",
+    "score": 40.0,
+    "pnl": 426706.8505344342,
+    "volume": 31844407.391999003,
+    "pnl_margin": 0.013399742230456627,
+    "win_rate": 0.0,
+    "positions_count": 74,
+    "avg_entry_price": 0.3646727129948304,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@0x8dxd"
+  },
+  {
+    "wallet": "0xd84c2b6d65dc596f49c7b6aadd6d74ca91e407b9",
+    "username": "BoneReader",
+    "score": 40.0,
+    "pnl": 425586.6691874737,
+    "volume": 78066395.349767,
+    "pnl_margin": 0.005451598825341997,
+    "win_rate": 0.0,
+    "positions_count": 60,
+    "avg_entry_price": 0.637455004799137,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@BoneReader"
+  },
+  {
+    "wallet": "0xd0d6053c3c37e727402d84c14069780d360993aa",
+    "username": "k9Q2mX4L8A7ZP3R",
+    "score": 40.0,
+    "pnl": 424087.1070972814,
+    "volume": 48175063.56549799,
+    "pnl_margin": 0.008803041982927534,
+    "win_rate": 0.0,
+    "positions_count": 89,
+    "avg_entry_price": 0.43695009957892983,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@k9Q2mX4L8A7ZP3R"
+  },
+  {
+    "wallet": "0x2d8b401d2f0e6937afebf18e19e11ca568a5260a",
+    "username": "vidarx",
+    "score": 40.0,
+    "pnl": 249381.27165487493,
+    "volume": 34022003.195938,
+    "pnl_margin": 0.007329999654007715,
+    "win_rate": 0.0,
+    "positions_count": 52,
+    "avg_entry_price": 0.46627645867003986,
+    "categories": [
+      "crypto",
+      "other"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@vidarx"
+  },
+  {
+    "wallet": "0xd1ebe815f921b3ebbd8d9e0a4192c6ab18360f5c",
+    "username": "0xd1ebE815f921b3EbBD8d9e0a4192C6Ab18360F5c-1772214308773",
+    "score": 40.0,
+    "pnl": 151635.48936223012,
+    "volume": 23045210.749730002,
+    "pnl_margin": 0.006579913328152431,
+    "win_rate": 0.0,
+    "positions_count": 76,
+    "avg_entry_price": 0.3522604831865578,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@0xd1ebE815f921b3EbBD8d9e0a4192C6Ab18360F5c-1772214308773"
+  },
+  {
+    "wallet": "0xd189664c5308903476f9f079820431e4fd7d06f4",
+    "username": "rwo",
+    "score": 40.0,
+    "pnl": 88455.27117625333,
+    "volume": 4047832.1601050003,
+    "pnl_margin": 0.021852504668562842,
+    "win_rate": 0.0,
+    "positions_count": 53,
+    "avg_entry_price": 0.3170902596774275,
+    "categories": [
+      "crypto",
+      "other",
+      "politics",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@rwo"
+  },
+  {
+    "wallet": "0x818f214c7f3e479cce1d964d53fe3db7297558cb",
+    "username": "livebreathevolatility",
+    "score": 40.0,
+    "pnl": 84877.17067547224,
+    "volume": 15424887.941488996,
+    "pnl_margin": 0.005502611817825555,
+    "win_rate": 0.0,
+    "positions_count": 91,
+    "avg_entry_price": 0.4810000186624195,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@livebreathevolatility"
+  },
+  {
+    "wallet": "0xe00740bce98a594e26861838885ab310ec3b548c",
+    "username": "distinct-baguette",
+    "score": 40.0,
+    "pnl": 83033.39171288698,
+    "volume": 8638264.912188,
+    "pnl_margin": 0.009612276603804147,
+    "win_rate": 0.0,
+    "positions_count": 76,
+    "avg_entry_price": 0.678503273009411,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@distinct-baguette"
+  },
+  {
+    "wallet": "0x7a1f8583ebfd41c5958327ca264f7299c5821033",
+    "username": "fason",
+    "score": 40.0,
+    "pnl": 73303.36829921223,
+    "volume": 5639484.456149001,
+    "pnl_margin": 0.012998239266230453,
+    "win_rate": 0.0,
+    "positions_count": 52,
+    "avg_entry_price": 0.4954446943861198,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@fason"
+  },
+  {
+    "wallet": "0x6fdc687773d4ba8753ea406f4eb2a403051a953f",
+    "username": "purple-lamp-tree",
+    "score": 40.0,
+    "pnl": 68624.91399745032,
+    "volume": 12038651.065367999,
+    "pnl_margin": 0.0057003823455657725,
+    "win_rate": 0.0,
+    "positions_count": 77,
+    "avg_entry_price": 0.5053703053853679,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@purple-lamp-tree"
+  },
+  {
+    "wallet": "0x29bc82f761749e67fa00d62896bc6855097b683c",
+    "username": "BoshBashBish",
+    "score": 40.0,
+    "pnl": 65480.92772061512,
+    "volume": 12235218.654171001,
+    "pnl_margin": 0.0053518396010268756,
+    "win_rate": 0.0,
+    "positions_count": 66,
+    "avg_entry_price": 0.40126271395684343,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@BoshBashBish"
+  },
+  {
+    "wallet": "0xb6e9b13eff71f87342e8baeff56ae2afb3b53008",
+    "username": "altsi",
+    "score": 40.0,
+    "pnl": 58119.04913175012,
+    "volume": 3604803.5733509995,
+    "pnl_margin": 0.01612266742116078,
+    "win_rate": 0.0,
+    "positions_count": 54,
+    "avg_entry_price": 0.5338462464429898,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@altsi"
+  },
+  {
+    "wallet": "0x8d7e554437fffe375af49d88ae32caf3ecde2fea",
+    "username": "iliiiiiiiiiiiiiiiii675",
+    "score": 40.0,
+    "pnl": 53150.11335443495,
+    "volume": 2830890.489514,
+    "pnl_margin": 0.018775051013562742,
+    "win_rate": 0.0,
+    "positions_count": 95,
+    "avg_entry_price": 0.6655811483004183,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@iliiiiiiiiiiiiiiiii675"
+  },
+  {
+    "wallet": "0x253ad134a7728b899610f8a004cbfc4a12f6af26",
+    "username": "0x253ad134a7728b899610f8a004cbfc4a12f6af26",
+    "score": 40.0,
+    "pnl": 52376.64620411078,
+    "volume": 4273471.127252999,
+    "pnl_margin": 0.012256230273814594,
+    "win_rate": 0.0,
+    "positions_count": 53,
+    "avg_entry_price": 0.55875003224641,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@0x253ad134a7728b899610f8a004cbfc4a12f6af26"
+  },
+  {
+    "wallet": "0xf247584e41117bbbe4cc06e4d2c95741792a5216",
+    "username": "0xf247584e41117bbBe4Cc06E4d2C95741792a5216-1742469835200",
+    "score": 40.0,
+    "pnl": 49528.47220133472,
+    "volume": 4789513.506002,
+    "pnl_margin": 0.01034102360067842,
+    "win_rate": 0.0,
+    "positions_count": 76,
+    "avg_entry_price": 0.6649002206881233,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@0xf247584e41117bbBe4Cc06E4d2C95741792a5216-1742469835200"
+  },
+  {
+    "wallet": "0x0f863d92dd2b960e3eb6a23a35fd92a91981404e",
+    "username": "Qualitative",
+    "score": 40.0,
+    "pnl": 47521.84952152238,
+    "volume": 1736842.494276,
+    "pnl_margin": 0.027361058747777695,
+    "win_rate": 0.0,
+    "positions_count": 99,
+    "avg_entry_price": 0.6226147606229059,
+    "categories": [
+      "crypto",
+      "other",
+      "politics",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@Qualitative"
+  },
+  {
+    "wallet": "0xf86d5b1a7573b0e2740a522d583f888512ccc8ed",
+    "username": "kjuhk1224",
+    "score": 40.0,
+    "pnl": 42690.50696516729,
+    "volume": 263280.549149,
+    "pnl_margin": 0.16214835126694901,
+    "win_rate": 0.0,
+    "positions_count": 25,
+    "avg_entry_price": 0.012800000004669338,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@kjuhk1224"
+  },
+  {
+    "wallet": "0x098fab4f4981110aeef16b20289cfa9f808a2a72",
+    "username": "0xCD3S5ANIGQ782356SRqR89L08xz9pLCNIGR",
+    "score": 40.0,
+    "pnl": 41243.2459548953,
+    "volume": 2126723.0150349997,
+    "pnl_margin": 0.019392862005688388,
+    "win_rate": 0.0,
+    "positions_count": 51,
+    "avg_entry_price": 0.3277311670779804,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@0xCD3S5ANIGQ782356SRqR89L08xz9pLCNIGR"
+  },
+  {
+    "wallet": "0x751a2b86cab503496efd325c8344e10159349ea1",
+    "username": "Sharky6999",
+    "score": 25.0,
+    "pnl": 89919.88125503046,
+    "volume": 12402901.153652003,
+    "pnl_margin": 0.007249907109721162,
+    "win_rate": 0.0,
+    "positions_count": 79,
+    "avg_entry_price": 0.9870671514168835,
+    "categories": [
+      "crypto",
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "BONDER",
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@Sharky6999"
+  },
+  {
+    "wallet": "0x20ad75e19b155f8518eb9e0486158f9884879c9a",
+    "username": "anon-fake",
+    "score": 25.0,
+    "pnl": 68197.22583724794,
+    "volume": 8412831.460985998,
+    "pnl_margin": 0.008106334490772636,
+    "win_rate": 0.0,
+    "positions_count": 50,
+    "avg_entry_price": 0.99193,
+    "categories": [
+      "crypto",
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "BONDER",
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@anon-fake"
+  },
+  {
+    "wallet": "0xba264376d6fef08f23a44db4153d12d47f5f23c9",
+    "username": "0xba264356d6fef08f23a44db4153d12d47f5",
+    "score": 25.0,
+    "pnl": 58954.05641647012,
+    "volume": 15976769.724749995,
+    "pnl_margin": 0.0036899859879148777,
+    "win_rate": 0.0,
+    "positions_count": 71,
+    "avg_entry_price": 0.9914636890819318,
+    "categories": [
+      "crypto",
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "BONDER",
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@0xba264356d6fef08f23a44db4153d12d47f5"
+  },
+  {
+    "wallet": "0xf7f0b0b1e9c0fe02ccad926916ee31aef74b912c",
+    "username": "Rock.San",
+    "score": 25.0,
+    "pnl": 49912.07368930655,
+    "volume": 4771338.682864,
+    "pnl_margin": 0.010460811316656897,
+    "win_rate": 0.0,
+    "positions_count": 64,
+    "avg_entry_price": 0.9886706000480651,
+    "categories": [
+      "crypto",
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "BONDER",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@Rock.San"
+  },
+  {
+    "wallet": "0x336151559e8c8b048de5231dc8313e196b314363",
+    "username": "0x336151559E8C8b048DE5231dC8313E196B31436",
+    "score": 25.0,
+    "pnl": 43572.55731044043,
+    "volume": 3768945.515674,
+    "pnl_margin": 0.011560941151638898,
+    "win_rate": 0.0,
+    "positions_count": 53,
+    "avg_entry_price": 0.99399,
+    "categories": [
+      "crypto",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "BONDER",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@0x336151559E8C8b048DE5231dC8313E196B31436"
+  }
+]

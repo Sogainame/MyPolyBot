@@ -1,0 +1,1058 @@
+[
+  {
+    "wallet": "0xc65ca4755436f82d8eb461e65781584b8cadea39",
+    "username": "UAEVALORANTFAN",
+    "score": 75.0,
+    "pnl": 458965.05443220434,
+    "volume": 2080047.9958309997,
+    "pnl_margin": 0.2206511846611709,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.5286092125192868,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@UAEVALORANTFAN"
+  },
+  {
+    "wallet": "0x91583ceb1ebec79951a068e1d7d02c1ea590fa7b",
+    "username": "GlobalizeTheHorchata",
+    "score": 75.0,
+    "pnl": 330123.71458299033,
+    "volume": 1472895.5837180007,
+    "pnl_margin": 0.22413246277082702,
+    "win_rate": 0.0,
+    "positions_count": 247,
+    "avg_entry_price": 0.4263000094504551,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@GlobalizeTheHorchata"
+  },
+  {
+    "wallet": "0xe90bec87d9ef430f27f9dcfe72c34b76967d5da2",
+    "username": "gmanas",
+    "score": 70.0,
+    "pnl": 749002.0740219658,
+    "volume": 12123036.650968006,
+    "pnl_margin": 0.06178337124487363,
+    "win_rate": 0.0,
+    "positions_count": 233,
+    "avg_entry_price": 0.6138608706024681,
+    "categories": [
+      "crypto",
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@gmanas"
+  },
+  {
+    "wallet": "0xb90494d9a5d8f71f1930b2aa4b599f95c344c255",
+    "username": "waterbottle6",
+    "score": 70.0,
+    "pnl": 589890.0047130438,
+    "volume": 10692233.433690999,
+    "pnl_margin": 0.05516995194421336,
+    "win_rate": 0.0,
+    "positions_count": 249,
+    "avg_entry_price": 0.3887250178309323,
+    "categories": [
+      "crypto",
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@waterbottle6"
+  },
+  {
+    "wallet": "0xc2e7800b5af46e6093872b177b7a5e7f0563be51",
+    "username": "beachboy4",
+    "score": 65.0,
+    "pnl": 2950954.101673129,
+    "volume": 9837945.443037001,
+    "pnl_margin": 0.2999563393352343,
+    "win_rate": 0.0,
+    "positions_count": 52,
+    "avg_entry_price": 0.579548574041944,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@beachboy4"
+  },
+  {
+    "wallet": "0xdc876e6873772d38716fda7f2452a78d426d7ab6",
+    "username": "432614799197",
+    "score": 65.0,
+    "pnl": 1506966.3878744934,
+    "volume": 33468641.110361,
+    "pnl_margin": 0.045026219705346114,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.49604419981951586,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@432614799197"
+  },
+  {
+    "wallet": "0x37c1874a60d348903594a96703e0507c518fc53a",
+    "username": "CemeterySun",
+    "score": 65.0,
+    "pnl": 1243740.0028917463,
+    "volume": 36685197.38479701,
+    "pnl_margin": 0.03390304786549068,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.5062900299954021,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@CemeterySun"
+  },
+  {
+    "wallet": "0xbddf61af533ff524d27154e589d2d7a81510c684",
+    "username": "Countryside",
+    "score": 65.0,
+    "pnl": 936155.6450317891,
+    "volume": 22814858.419990994,
+    "pnl_margin": 0.04103271770520847,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.37865001110127566,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@Countryside"
+  },
+  {
+    "wallet": "0x83720820a8aa6c3f20ad71850e7a1a17d16c5223",
+    "username": "Jsram",
+    "score": 65.0,
+    "pnl": 860015.8988481684,
+    "volume": 6365546.958377999,
+    "pnl_margin": 0.13510479216813578,
+    "win_rate": 0.0,
+    "positions_count": 68,
+    "avg_entry_price": 0.4207800119302327,
+    "categories": [
+      "other",
+      "politics",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@Jsram"
+  },
+  {
+    "wallet": "0x916f7165c2c836aba22edb6453cdbb5f3ea253ba",
+    "username": "WoofMaster",
+    "score": 65.0,
+    "pnl": 571304.8592790208,
+    "volume": 1549559.1163119997,
+    "pnl_margin": 0.36868865038124177,
+    "win_rate": 0.0,
+    "positions_count": 68,
+    "avg_entry_price": 0.5785000179375904,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@WoofMaster"
+  },
+  {
+    "wallet": "0xf19d7d88cf362110027dcd64750fdd209a04276f",
+    "username": "huhaoli",
+    "score": 65.0,
+    "pnl": 542928.3263006232,
+    "volume": 10179280.005601002,
+    "pnl_margin": 0.05333661378819374,
+    "win_rate": 0.0,
+    "positions_count": 142,
+    "avg_entry_price": 0.4409000191523309,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@huhaoli"
+  },
+  {
+    "wallet": "0x96489abcb9f583d6835c8ef95ffc923d05a86825",
+    "username": "anoin123",
+    "score": 65.0,
+    "pnl": 527652.896611548,
+    "volume": 12643762.228721,
+    "pnl_margin": 0.04173226979964519,
+    "win_rate": 0.0,
+    "positions_count": 201,
+    "avg_entry_price": 0.5626850145185431,
+    "categories": [
+      "other",
+      "politics"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@anoin123"
+  },
+  {
+    "wallet": "0x036c159d5a348058a81066a76b89f35926d4178d",
+    "username": "HedgeMaster88",
+    "score": 65.0,
+    "pnl": 437448.5930359716,
+    "volume": 6402977.327793,
+    "pnl_margin": 0.06831955989242161,
+    "win_rate": 0.0,
+    "positions_count": 152,
+    "avg_entry_price": 0.42330001446841253,
+    "categories": [
+      "crypto",
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@HedgeMaster88"
+  },
+  {
+    "wallet": "0xe72bb501df5306c75c89383d48a1e81073fbb0a0",
+    "username": "norrisfan",
+    "score": 65.0,
+    "pnl": 349900.87371622404,
+    "volume": 2638831.439134,
+    "pnl_margin": 0.13259690199501828,
+    "win_rate": 0.0,
+    "positions_count": 58,
+    "avg_entry_price": 0.4301814583544671,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@norrisfan"
+  },
+  {
+    "wallet": "0x93abbc022ce98d6f45d4444b594791cc4b7a9723",
+    "username": "gatorr",
+    "score": 60.0,
+    "pnl": 1154777.5094868601,
+    "volume": 12013410.191883001,
+    "pnl_margin": 0.09612403897330492,
+    "win_rate": 0.0,
+    "positions_count": 92,
+    "avg_entry_price": 0.47000003884059127,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@gatorr"
+  },
+  {
+    "wallet": "0x8c80d213c0cbad777d06ee3f58f6ca4bc03102c3",
+    "username": "SecondWindCapital",
+    "score": 60.0,
+    "pnl": 500549.1200186732,
+    "volume": 1449518.3397080002,
+    "pnl_margin": 0.3453209982286301,
+    "win_rate": 0.0,
+    "positions_count": 54,
+    "avg_entry_price": 0.8199156621013023,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@SecondWindCapital"
+  },
+  {
+    "wallet": "0x6ade597c0e2b43c0bf3542cada8a5e330d73f5b0",
+    "username": "TheOnlyHuman",
+    "score": 60.0,
+    "pnl": 393853.36623651756,
+    "volume": 7776409.163439999,
+    "pnl_margin": 0.05064720206444117,
+    "win_rate": 0.0,
+    "positions_count": 66,
+    "avg_entry_price": 0.511946411145242,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@TheOnlyHuman"
+  },
+  {
+    "wallet": "0x39d3c773be30fcc73161fc6768f46d563a779ef0",
+    "username": "matanovik",
+    "score": 60.0,
+    "pnl": 252304.85935639162,
+    "volume": 4206504.686761001,
+    "pnl_margin": 0.05997969291475241,
+    "win_rate": 0.0,
+    "positions_count": 72,
+    "avg_entry_price": 0.6124608370901231,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@matanovik"
+  },
+  {
+    "wallet": "0xefbc5fec8d7b0acdc8911bdd9a98d6964308f9a2",
+    "username": "reachingthesky",
+    "score": 55.0,
+    "pnl": 4485049.867819098,
+    "volume": 11366203.297438,
+    "pnl_margin": 0.39459525317746613,
+    "win_rate": 0.0,
+    "positions_count": 5,
+    "avg_entry_price": 0.5265000069453076,
+    "categories": [
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@reachingthesky"
+  },
+  {
+    "wallet": "0x02227b8f5a9636e895607edd3185ed6ee5598ff7",
+    "username": "HorizonSplendidView",
+    "score": 55.0,
+    "pnl": 4016107.832463995,
+    "volume": 12394130.309298988,
+    "pnl_margin": 0.3240330488901521,
+    "win_rate": 0.0,
+    "positions_count": 20,
+    "avg_entry_price": 0.5172000212216281,
+    "categories": [
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@HorizonSplendidView"
+  },
+  {
+    "wallet": "0x019782cab5d844f02bafb71f512758be78579f3c",
+    "username": "majorexploiter",
+    "score": 55.0,
+    "pnl": 2416975.0291252104,
+    "volume": 6949024.708900004,
+    "pnl_margin": 0.34781499999987847,
+    "win_rate": 0.0,
+    "positions_count": 3,
+    "avg_entry_price": 0.650157197757723,
+    "categories": [
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@majorexploiter"
+  },
+  {
+    "wallet": "0xf195721ad850377c96cd634457c70cd9e8308057",
+    "username": "JaJackson",
+    "score": 55.0,
+    "pnl": 634120.4868060425,
+    "volume": 2600605.0543790003,
+    "pnl_margin": 0.24383575112194975,
+    "win_rate": 0.0,
+    "positions_count": 39,
+    "avg_entry_price": 0.4304499117002542,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@JaJackson"
+  },
+  {
+    "wallet": "0x07921379f7b31ef93da634b688b2fe36897db778",
+    "username": "ewelmealt",
+    "score": 55.0,
+    "pnl": 369117.2834548104,
+    "volume": 2275399.0635150005,
+    "pnl_margin": 0.16222089978564191,
+    "win_rate": 0.0,
+    "positions_count": 45,
+    "avg_entry_price": 0.5112981778886075,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@ewelmealt"
+  },
+  {
+    "wallet": "0x59a0744db1f39ff3afccd175f80e6e8dfc239a09",
+    "username": "Blessed-Sunshine",
+    "score": 55.0,
+    "pnl": 334508.37607306265,
+    "volume": 2320070.9315830003,
+    "pnl_margin": 0.14418023669855012,
+    "win_rate": 0.0,
+    "positions_count": 16,
+    "avg_entry_price": 0.4963897591952792,
+    "categories": [
+      "other"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@Blessed-Sunshine"
+  },
+  {
+    "wallet": "0x204f72f35326db932158cba6adff0b9a1da95e14",
+    "username": "swisstony",
+    "score": 50.0,
+    "pnl": 626704.2412829157,
+    "volume": 101174480.293058,
+    "pnl_margin": 0.00619429167777911,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.5282770089817567,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@swisstony"
+  },
+  {
+    "wallet": "0xee613b3fc183ee44f9da9c05f53e2da107e3debf",
+    "username": "sovereign2013",
+    "score": 50.0,
+    "pnl": 618774.8643076366,
+    "volume": 49107036.323906,
+    "pnl_margin": 0.012600533663368487,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.45005001214791585,
+    "categories": [
+      "other"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@sovereign2013"
+  },
+  {
+    "wallet": "0x507e52ef684ca2dd91f90a9d26d149dd3288beae",
+    "username": "GamblingIsAllYouNeed",
+    "score": 50.0,
+    "pnl": 592348.8018743461,
+    "volume": 31261290.913828,
+    "pnl_margin": 0.0189483154584742,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.5459985503174949,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@GamblingIsAllYouNeed"
+  },
+  {
+    "wallet": "0xde17f7144fbd0eddb2679132c10ff5e74b120988",
+    "username": "0xdE17f7144fbD0eddb2679132C10ff5e74B120988-1772205225932",
+    "score": 50.0,
+    "pnl": 438708.9499895632,
+    "volume": 28400430.587127004,
+    "pnl_margin": 0.015447264035088813,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.720175047298196,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@0xdE17f7144fbD0eddb2679132C10ff5e74B120988-1772205225932"
+  },
+  {
+    "wallet": "0x8f037a2e4fd49d11267f4ab874ab7ba745ac64d6",
+    "username": "Anointed-Connect",
+    "score": 50.0,
+    "pnl": 365026.9911095704,
+    "volume": 12840031.832737,
+    "pnl_margin": 0.028428822908280957,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.4646500303335494,
+    "categories": [
+      "other"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@Anointed-Connect"
+  },
+  {
+    "wallet": "0x6ac5bb06a9eb05641fd5e82640268b92f3ab4b6e",
+    "username": "0p0jogggg",
+    "score": 50.0,
+    "pnl": 337206.387014268,
+    "volume": 51810609.446821,
+    "pnl_margin": 0.0065084427806312625,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.44450001390636357,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@0p0jogggg"
+  },
+  {
+    "wallet": "0xa8e089ade142c95538e06196e09c85681112ad50",
+    "username": "Wannac",
+    "score": 50.0,
+    "pnl": 328188.072232017,
+    "volume": 13450846.690477,
+    "pnl_margin": 0.02439906422131547,
+    "win_rate": 0.0,
+    "positions_count": 228,
+    "avg_entry_price": 0.5069500243388105,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@Wannac"
+  },
+  {
+    "wallet": "0xb6aee7f281e13b23bd959127f6e2b3dccb4e4df8",
+    "username": "hugesportswhale",
+    "score": 50.0,
+    "pnl": 302990.9875978184,
+    "volume": 12839095.106266998,
+    "pnl_margin": 0.023599092076973787,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.5844500102459016,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@hugesportswhale"
+  },
+  {
+    "wallet": "0xd6a3f0ec6c4a8ad680d580610c82ca57ff139489",
+    "username": "knedloveprovelo",
+    "score": 50.0,
+    "pnl": 289942.076145601,
+    "volume": 29649527.020005,
+    "pnl_margin": 0.009778978125012671,
+    "win_rate": 0.0,
+    "positions_count": 250,
+    "avg_entry_price": 0.3277960062470489,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@knedloveprovelo"
+  },
+  {
+    "wallet": "0xfd22b8843ae03a33a8a4c5e39ef1e5ff33ebad91",
+    "username": "AML",
+    "score": 50.0,
+    "pnl": 273756.367734701,
+    "volume": 2459251.1272040005,
+    "pnl_margin": 0.11131696340663802,
+    "win_rate": 0.0,
+    "positions_count": 18,
+    "avg_entry_price": 0.7700000111244268,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@AML"
+  },
+  {
+    "wallet": "0x2a2c53bd278c04da9962fcf96490e17f3dfb9bc1",
+    "username": "0x2a2C53bD278c04DA9962Fcf96490E17F3DfB9Bc1-1772479215461",
+    "score": 45.0,
+    "pnl": 1815112.1347333938,
+    "volume": 100573406.683926,
+    "pnl_margin": 0.018047635001942234,
+    "win_rate": 0.0,
+    "positions_count": 192,
+    "avg_entry_price": 0.32615000348269624,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@0x2a2C53bD278c04DA9962Fcf96490E17F3DfB9Bc1-1772479215461"
+  },
+  {
+    "wallet": "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee",
+    "username": "kch123",
+    "score": 45.0,
+    "pnl": 552915.9487519827,
+    "volume": 21985626.066878,
+    "pnl_margin": 0.025148974474052708,
+    "win_rate": 0.0,
+    "positions_count": 134,
+    "avg_entry_price": 0.5742527962854884,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@kch123"
+  },
+  {
+    "wallet": "0x0b9cae2b0dfe7a71c413e0604eaac1c352f87e44",
+    "username": "geniusMC",
+    "score": 45.0,
+    "pnl": 449062.59042145516,
+    "volume": 15347082.147647997,
+    "pnl_margin": 0.02926045394826246,
+    "win_rate": 0.0,
+    "positions_count": 122,
+    "avg_entry_price": 0.5182655348487829,
+    "categories": [
+      "crypto",
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@geniusMC"
+  },
+  {
+    "wallet": "0x2005d16a84ceefa912d4e380cd32e7ff827875ea",
+    "username": "RN1",
+    "score": 45.0,
+    "pnl": 428668.72805359587,
+    "volume": 33887564.093748994,
+    "pnl_margin": 0.012649735663138722,
+    "win_rate": 0.0,
+    "positions_count": 172,
+    "avg_entry_price": 0.533595023020625,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@RN1"
+  },
+  {
+    "wallet": "0x0720803c7cb0d0c5a928787b3b7ea148c6831cdb",
+    "username": "pinkblanket",
+    "score": 45.0,
+    "pnl": 386270.50084288,
+    "volume": 11253514.107238002,
+    "pnl_margin": 0.03432443387567619,
+    "win_rate": 0.0,
+    "positions_count": 17,
+    "avg_entry_price": 0.5159999893510601,
+    "categories": [
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@pinkblanket"
+  },
+  {
+    "wallet": "0xee00ba338c59557141789b127927a55f5cc5cea1",
+    "username": "S-Works",
+    "score": 45.0,
+    "pnl": 289785.2947405878,
+    "volume": 4121942.6814649994,
+    "pnl_margin": 0.07030308695063994,
+    "win_rate": 0.0,
+    "positions_count": 70,
+    "avg_entry_price": 0.9538200016280111,
+    "categories": [
+      "crypto",
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "BONDER",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@S-Works"
+  },
+  {
+    "wallet": "0x1f0ebc543b2d411f66947041625c0aa1ce61cf86",
+    "username": "0x1f0ebc543B2d411f66947041625c0Aa1ce61CF86-1772205597930",
+    "score": 45.0,
+    "pnl": 254849.97214216445,
+    "volume": 60417155.934627995,
+    "pnl_margin": 0.0042181722757343105,
+    "win_rate": 0.0,
+    "positions_count": 123,
+    "avg_entry_price": 0.37063750894607084,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@0x1f0ebc543B2d411f66947041625c0Aa1ce61CF86-1772205597930"
+  },
+  {
+    "wallet": "0x492442eab586f242b53bda933fd5de859c8a3782",
+    "username": "0x492442EaB586F242B53bDa933fD5dE859c8A3782-1766317541188",
+    "score": 40.0,
+    "pnl": 983886.0101978295,
+    "volume": 67268684.98483199,
+    "pnl_margin": 0.014626211444741041,
+    "win_rate": 0.0,
+    "positions_count": 80,
+    "avg_entry_price": 0.48618257517138347,
+    "categories": [
+      "other"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@0x492442EaB586F242B53bDa933fD5dE859c8A3782-1766317541188"
+  },
+  {
+    "wallet": "0x63ce342161250d705dc0b16df89036c8e5f9ba9a",
+    "username": "0x8dxd",
+    "score": 40.0,
+    "pnl": 426706.91053443815,
+    "volume": 31844407.391999,
+    "pnl_margin": 0.013399744114618051,
+    "win_rate": 0.0,
+    "positions_count": 77,
+    "avg_entry_price": 0.4437780309065824,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@0x8dxd"
+  },
+  {
+    "wallet": "0xd0d6053c3c37e727402d84c14069780d360993aa",
+    "username": "k9Q2mX4L8A7ZP3R",
+    "score": 40.0,
+    "pnl": 424087.107097273,
+    "volume": 48175063.56549801,
+    "pnl_margin": 0.008803041982927355,
+    "win_rate": 0.0,
+    "positions_count": 81,
+    "avg_entry_price": 0.40718923250927525,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@k9Q2mX4L8A7ZP3R"
+  },
+  {
+    "wallet": "0xb45a797faa52b0fd8adc56d30382022b7b12192c",
+    "username": "bcda",
+    "score": 40.0,
+    "pnl": 353139.4608636894,
+    "volume": 12809249.15166,
+    "pnl_margin": 0.02756909922529883,
+    "win_rate": 0.0,
+    "positions_count": 58,
+    "avg_entry_price": 0.5389050666196822,
+    "categories": [
+      "other"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@bcda"
+  },
+  {
+    "wallet": "0xa49becb692927d455924583b5e3e5788246f4c40",
+    "username": "sleepy-panda",
+    "score": 40.0,
+    "pnl": 278009.64463011076,
+    "volume": 11625457.495297,
+    "pnl_margin": 0.02391386702351952,
+    "win_rate": 0.0,
+    "positions_count": 57,
+    "avg_entry_price": 0.6200000249800314,
+    "categories": [
+      "other",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@sleepy-panda"
+  },
+  {
+    "wallet": "0x2d8b401d2f0e6937afebf18e19e11ca568a5260a",
+    "username": "vidarx",
+    "score": 40.0,
+    "pnl": 249381.2716548752,
+    "volume": 34022003.195938,
+    "pnl_margin": 0.007329999654007723,
+    "win_rate": 0.0,
+    "positions_count": 52,
+    "avg_entry_price": 0.45281247847385514,
+    "categories": [
+      "crypto",
+      "other"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@vidarx"
+  },
+  {
+    "wallet": "0xd84c2b6d65dc596f49c7b6aadd6d74ca91e407b9",
+    "username": "BoneReader",
+    "score": 35.0,
+    "pnl": 425586.669187474,
+    "volume": 78066395.349767,
+    "pnl_margin": 0.005451598825342001,
+    "win_rate": 0.0,
+    "positions_count": 61,
+    "avg_entry_price": 0.8176328029263908,
+    "categories": [
+      "crypto"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@BoneReader"
+  },
+  {
+    "wallet": "0x0c0e270cf879583d6a0142fc817e05b768d0434e",
+    "username": "The Spirit of Ukraine>UMA",
+    "score": 35.0,
+    "pnl": 272166.68450244627,
+    "volume": 10639286.027375,
+    "pnl_margin": 0.02558129218465961,
+    "win_rate": 0.0,
+    "positions_count": 216,
+    "avg_entry_price": 0.025449999912519998,
+    "categories": [
+      "crypto",
+      "other",
+      "politics",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@The Spirit of Ukraine>UMA"
+  },
+  {
+    "wallet": "0xed107a85a4585a381e48c7f7ca4144909e7dd2e5",
+    "username": "bobe2",
+    "score": 25.0,
+    "pnl": 282690.3339054539,
+    "volume": 29320708.304543003,
+    "pnl_margin": 0.009641320085765232,
+    "win_rate": 0.0,
+    "positions_count": 82,
+    "avg_entry_price": 0.9924200003664793,
+    "categories": [
+      "crypto",
+      "other",
+      "politics",
+      "sports"
+    ],
+    "biggest_win": 0,
+    "biggest_loss": 0,
+    "flags": [
+      "BONDER",
+      "LOW_MARGIN",
+      "TOO_FEW_RESOLVED"
+    ],
+    "profile": "https://polymarket.com/@bobe2"
+  }
+]

@@ -26,7 +26,7 @@ from dotenv import load_dotenv
 
 from py_clob_client.client import ClobClient
 from py_clob_client.clob_types import OrderArgs, OrderType
-from py_clob_client.order_builder.constants import BUY
+from py_clob_client.order_builder.constants import BUY, SELL
 
 from observer import MarketFinder, PriceLogger
 from notifier import send_telegram
@@ -485,6 +485,32 @@ class GabagoolTrader:
         print(f"\n  [PAIR] {msg}")
         send_telegram(msg)
 
+    # ── Sell filled position ─────────────────────────────────────────────────
+
+    def _sell_position(self, token_id: str, shares: float, side_label: str) -> bool:
+        """Market sell a filled position. Returns True if order submitted."""
+        if self.dry_run:
+            print(f"\n  [DRY] Would sell {side_label} x{shares}sh")
+            return True
+        try:
+            midpoint = self._fetch_midpoint(token_id)
+            if midpoint <= 0.02:
+                midpoint = 0.05  # floor price to avoid selling at zero
+            order_args = OrderArgs(
+                token_id=token_id,
+                price=round(midpoint, 2),
+                size=shares,
+                side=SELL,
+            )
+            signed = self.clob.create_order(order_args)
+            resp = self.clob.post_order(signed, OrderType.GTC)
+            order_id = resp.get("orderID") if isinstance(resp, dict) else None
+            print(f"\n  [SELL] {side_label} @ {midpoint:.3f} x{shares}sh | ID: {order_id or '?'}")
+            return True
+        except Exception as e:
+            print(f"\n  [!] Sell failed ({side_label}): {e}")
+            return False
+
     # ── Cancel open orders ────────────────────────────────────────────────────
 
     def _cancel_all_open_orders(self):
@@ -675,6 +701,7 @@ class GabagoolTrader:
                             print(f"\n  [DANGER] Would sell {filled_side} @ {current_price:.3f} ({reason})")
                         else:
                             self._cancel_all_open_orders()
+                            self._sell_position(filled_token, self.shares, filled_side)
                             print(f"\n  [DANGER] Selling {filled_side} @ market ({reason})")
                         msg = f"⚠️ DANGER EXIT: sold {filled_side} @ {current_price:.3f} ({reason}) | {slug_s}"
                         send_telegram(msg)

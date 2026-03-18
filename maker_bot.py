@@ -128,6 +128,9 @@ class MakerBot:
                         price = float(data.get("p", 0))
                         if price > 0:
                             self.state.last_btc_price = price
+                            if self.state.window_open_price is None:
+                                self.state.window_open_price = price
+                                print(f"[BTC] Open price fixed (mid-window): {price:.2f}")
 
                             # Запоминаем цену открытия нового окна
                             cur_ts = self._current_window_ts()
